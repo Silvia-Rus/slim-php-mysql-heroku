@@ -39,7 +39,7 @@ $app->group('/usuarios', function (RouteCollectorProxy $group) {
   });
 
 $app->get('[/]', function (Request $request, Response $response) {    
-    $response->getBody()->write("¡Holi!");
+    $response->getBody()->write("¡Holi?");
     return $response;
 
 });
