@@ -37,4 +37,121 @@ class AccesoDatos
     {
         trigger_error('ERROR: La clonación de este objeto no está permitida', E_USER_ERROR);
     }
+
+    public static function borrarRegistro($id, $tabla)
+    {
+        $retorno = false;
+        try
+        {   
+            if($id != null)
+            {
+                $conexion = AccesoDatos::obtenerInstancia();
+                $consulta = $conexion->prepaparConsulta("UPDATE $tabla 
+                                                         SET alta = :alta, ultima_actualizacion = :ultima_actualizacion
+                                                         WHERE id = :id");
+                $fecha = new DateTime(date("d-m-Y"));
+                $consulta->bindValue(':ultima_atualizacion', date_format($fecha, 'Y-m-d H:i:s'));
+                $consulta->bindValue(':alta', '0');
+                $consulta->execute();
+                $retorno = true;
+            }
+        }
+        catch(Throwable $mensaje)
+        {
+            printf("Error al borrar en la base de datos: <br> $mensaje .<br>");
+        }
+        finally
+        {
+            return $retorno;
+        }
+    }
+
+    public static function retornarObjeto($id, $tabla, $clase)
+    {
+        $retorno = null;
+        try
+        {
+            $conexion = AccesoDatos::obtenerInstancia();
+            $consulta = $conexion->prepararConsulta("SELECT * FROM $tabla WHERE $id = $tabla.id");
+            $consulta->execute();
+            $resultado = $consulta->fetchObject($clase);
+            $retorno = $resultado;          
+        }
+        catch(Throwable $mensaje)
+        {
+            printf("Error al buscar en la base de datos: <br> $mensaje .<br>");
+        }
+        finally
+        {
+            return $retorno;
+        }
+    }
+
+    public static function retornarIdPorCampo($valor, $campo, $tabla, $clase)
+    {
+        $retorno = null;
+        try
+        {
+            $conexion = AccesoDatos::obtenerInstancia();
+            $consulta = $conexion->prepararConsulta("SELECT * FROM $tabla WHERE $valor = $tabla.$campo");
+            $consulta->execute();
+            $resultado = $consulta->fetchObject($clase);
+            $retorno = $resultado->id;          
+        }
+        catch(Throwable $mensaje)
+        {
+            printf("Error al buscar en la base de datos: <br> $mensaje .<br>");
+        }
+        finally
+        {
+            return $retorno;
+        }
+    }
+
+    public static function obtenerTodos($tabla, $clase)
+    {
+        $retorno = null;
+        try
+        {
+            $conexion = AccesoDatos::obtenerInstancia();
+            $consulta = $conexion->prepararConsulta("SELECT * FROM $tabla");
+            $consulta->execute();
+            $retorno = $consulta->fetchAll(PDO::FETCH_CLASS, $clase);
+        }
+        catch(Throwable $mensaje)
+        {
+            printf("Error al buscar en la base de datos: <br> $mensaje .<br>");
+        }
+        finally
+        {
+            return $retorno;
+        }   
+    }
+
+    public static function modificarCampo($id, $tabla, $campo, $valor)
+    {
+        $retorno = false;
+        try
+        {   
+            if($id != null && $campo != 'id')
+            {
+                $conexion = AccesoDatos::obtenerInstancia();
+                $consulta = $conexion->prepaparConsulta("UPDATE $tabla 
+                                                         SET $campo = $valor, ultima_actualizacion = :ultima_actualizacion 
+                                                         WHERE id = $id");
+                $fecha = new DateTime(date("d-m-Y"));
+                $consulta->bindValue(':ultima_atualizacion', date_format($fecha, 'Y-m-d H:i:s'));
+                $consulta->execute();
+                $retorno = true;
+            }
+        }
+        catch(Throwable $mensaje)
+        {
+            printf("Error al borrar en la base de datos: <br> $mensaje .<br>");
+        }
+        finally
+        {
+            return $retorno;
+        }
+    }
 }
