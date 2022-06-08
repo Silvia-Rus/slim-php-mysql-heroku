@@ -47,11 +47,11 @@ class AccesoDatos
             {
                 $conexion = AccesoDatos::obtenerInstancia();
                 $consulta = $conexion->prepaparConsulta("UPDATE $tabla 
-                                                         SET alta = :alta, ultima_actualizacion = :ultima_actualizacion
+                                                         SET activo = :activo, updated_at = :updated_at
                                                          WHERE id = :id");
                 $fecha = new DateTime(date("d-m-Y"));
-                $consulta->bindValue(':ultima_atualizacion', date_format($fecha, 'Y-m-d H:i:s'));
-                $consulta->bindValue(':alta', '0');
+                $consulta->bindValue(':updated_at', date_format($fecha, 'Y-m-d H:i:s'));
+                $consulta->bindValue(':activo', '0');
                 $consulta->execute();
                 $retorno = true;
             }
@@ -137,10 +137,10 @@ class AccesoDatos
             {
                 $conexion = AccesoDatos::obtenerInstancia();
                 $consulta = $conexion->prepaparConsulta("UPDATE $tabla 
-                                                         SET $campo = $valor, ultima_actualizacion = :ultima_actualizacion 
+                                                         SET $campo = $valor, updated_at = :updated_at 
                                                          WHERE id = $id");
                 $fecha = new DateTime(date("d-m-Y"));
-                $consulta->bindValue(':ultima_atualizacion', date_format($fecha, 'Y-m-d H:i:s'));
+                $consulta->bindValue(':updated_at', date_format($fecha, 'Y-m-d H:i:s'));
                 $consulta->execute();
                 $retorno = true;
             }

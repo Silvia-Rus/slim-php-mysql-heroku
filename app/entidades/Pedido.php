@@ -13,8 +13,9 @@ class Pedido
     public $preciofinal;
     public $fechaPrevista;
     public $fechaReal;
-    public $alta; //con cliente esperando pedido” , ”con cliente comiendo”, “con cliente pagando” y “cerrada”.
-    public $ultimaActualizacion;
+    public $activo; //con cliente esperando pedido” , ”con cliente comiendo”, “con cliente pagando” y “cerrada”.
+    public $created_at;
+    public $updated_at;
     public $foto;
        
     public function crearRegistro() // OJO HACERLO
