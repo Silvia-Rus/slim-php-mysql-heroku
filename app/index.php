@@ -13,35 +13,26 @@ use Slim\Routing\RouteContext;
 
 require __DIR__ . '/../vendor/autoload.php';
 
-require_once './db/AccesoDatos.php';
-// require_once './middlewares/Logger.php';
+include_once './api/UsuarioAPI.php';
+include_once './api/ProductoAPI.php';
+include_once './api/MesaAPI.php';
 
-require_once './controllers/UsuarioController.php';
+include_once './db/AccesoDatos.php';
 
-// Load ENV
-$dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
-$dotenv->safeLoad();
-
-// Instantiate App
 $app = AppFactory::create();
-
-// Add error middleware
 $app->addErrorMiddleware(true, true, true);
 
-// Add parse body
-$app->addBodyParsingMiddleware();
-
-// Routes
-$app->group('/usuarios', function (RouteCollectorProxy $group) {
-    $group->get('[/]', \UsuarioController::class . ':TraerTodos');
-    $group->get('/{usuario}', \UsuarioController::class . ':TraerUno');
-    $group->post('[/]', \UsuarioController::class . ':CargarUno');
-  });
-
 $app->get('[/]', function (Request $request, Response $response) {    
-    $response->getBody()->write("¡Holi?");
-    return $response;
+  $response->getBody()->write("¡Comanda de Rus! :)");
+  return $response;
 
 });
+
+//Usuarios
+$app->post('/empleados/alta[/]', \UsuarioAPI::class . ':Alta'); 
+//Productos 
+$app->post('/productos/alta[/]', \ProductoAPI::class . ':Alta');  
+//Mesas
+$app->post('/mesa/alta[/]', \MesaAPI::class . ':Alta');  
 
 $app->run();

@@ -4,7 +4,6 @@ class TipoUsuario
 {
     public $id;
     public $nombre;
-    public $alta;
     public $activo;
     public $created_at;
     public $updated_at;
