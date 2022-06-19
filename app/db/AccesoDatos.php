@@ -7,8 +7,8 @@ class AccesoDatos
     private function __construct()
     {
         try {
-            //$this->objetoPDO = new PDO('mysql:host='.$_ENV['MYSQL_HOST'].';dbname='.$_ENV['MYSQL_DB'].';charset=utf8', $_ENV['MYSQL_USER'], $_ENV['MYSQL_PASS'], array(PDO::ATTR_EMULATE_PREPARES => false, PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION));
-            $this->objetoPDO = new PDO("mysql:host=127.0.0.1:3306;dbname=comandaApp", 'root', '', array(PDO::ATTR_EMULATE_PREPARES => false,PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION));
+            $this->objetoPDO = new PDO('mysql:host='.$_ENV['MYSQL_HOST'].';dbname='.$_ENV['MYSQL_DB'].';charset=utf8', $_ENV['MYSQL_USER'], $_ENV['MYSQL_PASS'], array(PDO::ATTR_EMULATE_PREPARES => false, PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION));
+            //$this->objetoPDO = new PDO("mysql:host=127.0.0.1:3306;dbname=comandaApp", 'root', '', array(PDO::ATTR_EMULATE_PREPARES => false,PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION));
             $this->objetoPDO->exec("SET CHARACTER SET utf8");
         } catch (PDOException $e) {
             print "Error: " . $e->getMessage();
@@ -164,5 +164,55 @@ class AccesoDatos
         {
             return $retorno;
         }
+    }
+
+    public static function ImprimirTabla($tabla, $clase)
+    {           
+        $retorno = null;
+        try
+        {
+            $retorno = array();
+            $conexion = AccesoDatos::obtenerInstancia();
+            $retorno = $conexion->obtenerTodos($tabla, $clase);
+            //$retorno = AccesoDatos::ImprimirArray($resultado);
+        }
+        catch (Throwable $mensaje)
+        {
+            printf("Error al consultar la base de datos: <br> $mensaje .<br>");
+            die();
+        }
+        finally
+        {
+            return $retorno;
+        }  
+
+    }
+
+    public static function ImprimirArray($array)
+    {
+        if(sizeof($array) == 0 || $array == null)
+        {
+            print "\t<td>Sin datos disponibles.</td>\n";
+            print "</tr>\n";
+        }
+        else
+        { 
+            foreach ($array as $fila) 
+            {
+                foreach ($fila as $columna) 
+                {
+                    if($columna == null)
+                    {
+                        print "\t<td>Sin datos disponibles.</td>\n";
+                    }
+                    else
+                    {
+                        print "\t<td>$columna</td>\n";
+                    }
+                    print "\t<td>$columna</td>\n";
+                }
+                print "</tr>\n";
+            } 
+        }       
     }
 }

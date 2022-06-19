@@ -11,7 +11,7 @@ class Mesa
 
     public static function Alta($mesa)
     {
-        $mesa->crearRegistro();
+        return $mesa->crearRegistro();
     }
        
     public function crearRegistro()
@@ -24,7 +24,7 @@ class Mesa
                                                                   VALUES (:nombre, :activo, :created_at, :updated_at)");
             $consulta->bindValue(':nombre', $this->nombre, PDO::PARAM_STR);
             $consulta->bindValue(':activo', '1', PDO::PARAM_STR);
-            $fecha = new DateTime(date("d-m-Y"));
+            $fecha = new DateTime(date("d-m-Y H:i:s"));
             $consulta->bindValue(':created_at', date_format($fecha, 'Y-m-d H:i:s'));
             $consulta->bindValue(':updated_at', date_format($fecha, 'Y-m-d H:i:s'));
             $consulta->execute();
