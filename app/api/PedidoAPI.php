@@ -5,6 +5,7 @@ include_once("Entidades/Pedido.php");
 
 class PedidoAPI
 {
+    
     public function Alta($request, $response, $args)
     {
         try
@@ -40,7 +41,6 @@ class PedidoAPI
         }
     }
 
-
     public function Listar($request, $response, $args)
     {
         try
@@ -58,6 +58,71 @@ class PedidoAPI
         {
             return $newResponse;
         }    
+    }
+
+    public function PasarAComiendo($request, $response, $args)
+    {
+        try
+        {           
+            $params = $request->getParsedBody();
+            $mesa = $params["mesa"];
+            Pedido::CambiarEstado($mesa, '2');
+            $payload = json_encode("Estado cambiado con éxito.");
+            $response->getBody()->write($payload);
+            $newResponse = $response->withHeader('Content-Type', 'application/json');
+
+        }
+        catch(Throwable $mensaje)
+        {
+            printf("Error al cambia el estado: <br> $mensaje .<br>");
+        }
+        finally
+        {
+            return $newResponse;
+        }  
+    }
+
+    public function PasarAPagando($request, $response, $args)
+    {
+        try
+        {           
+            $params = $request->getParsedBody();
+            $mesa = $params["mesa"];
+            Pedido::CambiarEstado($mesa, '3');
+            $payload = json_encode("Estado cambiado con éxito.");
+            $response->getBody()->write($payload);
+            $newResponse = $response->withHeader('Content-Type', 'application/json');
+
+        }
+        catch(Throwable $mensaje)
+        {
+            printf("Error al cambia el estado: <br> $mensaje .<br>");
+        }
+        finally
+        {
+            return $newResponse;
+        }  
+    }
+
+    public function CerrarPedido($request, $response, $args)
+    {
+        try
+        {           
+            $params = $request->getParsedBody();
+            $mesa = $params["mesa"];
+            Pedido::CambiarEstado($mesa, '4');
+            $payload = json_encode("Estado cambiado con éxito.");
+            $response->getBody()->write($payload);
+            $newResponse = $response->withHeader('Content-Type', 'application/json');
+        }
+        catch(Throwable $mensaje)
+        {
+            printf("Error al cambia el estado: <br> $mensaje .<br>");
+        }
+        finally
+        {
+            return $newResponse;
+        }  
     }
 
 

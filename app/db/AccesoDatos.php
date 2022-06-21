@@ -139,6 +139,76 @@ class AccesoDatos
         }   
     }
 
+    public static function ObtenerConsulta($sql)
+    {
+        try
+        {
+            $conexion = AccesoDatos::obtenerInstancia();
+            $consulta = $conexion->prepararConsulta($sql);
+            $consulta->execute();
+            $retorno = $consulta->fetchAll();
+        }
+        catch(Throwable $mensaje)
+        {
+            printf("Error al buscar en la base de datos: <br> $mensaje .<br>");
+        }
+        finally
+        {
+            return $retorno;
+        } 
+        
+    }
+
+    public static function ObtenerPedidosPorSector($sector)
+    {
+        $sql = "SELECT  pp.id,
+                        pp.id_pedido AS pedido, 
+                        pr.nombre AS producto, 
+                        pp.cantidad AS cantidad, 
+                        CASE 
+                        WHEN pp.estado = 0 THEN 'Pendiente' 
+                        WHEN pp.estado = 1 THEN 'En preparación' 
+                        WHEN pp.estado = 2 THEN 'Listo' 
+                        ELSE 'Error' end
+                        as Estado 
+                FROM pedido_producto pp 
+                    LEFT JOIN producto pr ON pp.id_producto = pr.id
+                    LEFT JOIN sector s ON pr.id_sector = s.id
+                WHERE s.id = $sector and pp.estado < 3
+                ORDER BY pp.id_pedido, pp.created_at;";
+         
+        return AccesoDatos::ObtenerConsulta($sql);
+        /*try
+        {
+            $conexion = AccesoDatos::obtenerInstancia();
+            $consulta = $conexion->prepararConsulta("SELECT pp.id,
+                                                            pp.id_pedido AS pedido, 
+                                                            pr.nombre AS producto, 
+                                                            pp.cantidad AS cantidad, 
+                                                            CASE 
+                                                            WHEN pp.estado = 0 THEN 'Pendiente' 
+                                                            WHEN pp.estado = 1 THEN 'En preparación' 
+                                                            WHEN pp.estado = 2 THEN 'Listo' 
+                                                            ELSE 'Error' end
+                                                            as Estado 
+                                                    FROM pedido_producto pp 
+                                                        LEFT JOIN producto pr ON pp.id_producto = pr.id
+                                                        LEFT JOIN sector s ON pr.id_sector = s.id
+                                                    WHERE s.id = $sector and pp.estado < 3
+                                                    ORDER BY pp.id_pedido, pp.created_at;");
+            $consulta->execute();
+            $retorno = $consulta->fetchAll(PDO::FETCH_CLASS);
+        }
+        catch(Throwable $mensaje)
+        {
+            printf("Error al buscar en la base de datos: <br> $mensaje .<br>");
+        }
+        finally
+        {
+            return $retorno;
+        }*/
+    }
+
     public static function modificarCampo($id, $tabla, $campo, $valor)
     {
         $retorno = false;
@@ -185,10 +255,9 @@ class AccesoDatos
         {
             return $retorno;
         }  
-
     }
 
-    public static function ImprimirArray($array)
+    /*public static function ImprimirArray($array)
     {
         if(sizeof($array) == 0 || $array == null)
         {
@@ -214,5 +283,5 @@ class AccesoDatos
                 print "</tr>\n";
             } 
         }       
-    }
+    }*/
 }

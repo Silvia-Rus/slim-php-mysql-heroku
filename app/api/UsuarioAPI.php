@@ -1,5 +1,7 @@
 <?php
 include_once("Entidades/Usuario.php");
+include_once("token/Token.php");
+
 
 class UsuarioAPI
 {
@@ -45,6 +47,43 @@ class UsuarioAPI
         }
     }
 
+    public function Login($request, $response, $args)
+    {
+        try
+        {
+            $params = $request->getParsedBody();
+            $dni = $params["dni"];
+            $clave = $params["clave"];
+            $usuario = Usuario::Login($dni, $clave);
+            //var_dump($usuario);
+    
+            if($usuario != null)
+            {
+                $token = Token::GenerarToken($usuario->id, $usuario->tipo);
+                //$respuesta = $token;
+                $respuesta = "Usuario logueado con exito";
+            }
+            else
+            {
+                $respuesta = "Credenciales incorrectas.";
+            }
+    
+            $payload = json_encode($respuesta);
+            $response->getBody()->write($payload);
+            $newResponse = $response->withHeader('Content-Type', 'application/json');
+
+        }
+        catch(Throwable $mensaje)
+        {
+            printf("Error al loguearse: <br> $mensaje .<br>");
+        }
+        finally
+        {
+            return $newResponse;
+        }
+
+    }
+
     public function Listar($request, $response, $args)
     {
         try
@@ -63,6 +102,7 @@ class UsuarioAPI
             return $newResponse;
         }    
     }
+
 }
 
 ?>

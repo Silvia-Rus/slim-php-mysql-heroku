@@ -48,6 +48,21 @@ class Usuario
         }
         return $retorno;
     }
+
+    public static function Login($dni, $clave)
+    {
+        $retorno = null;
+        $idDni = AccesoDatos::retornarIdPorCampo($dni, 'dni', 'usuario', 'Usuario');
+        if($idDni != null)
+        {
+            $usuario = AccesoDatos::retornarObjeto($idDni, 'usuario', 'Usuario');
+            if($clave == $usuario->clave)
+            {
+                $retorno = $usuario;
+            }
+        }
+        return $retorno;
+    }
     //Manejo BD
     public function crearRegistro()
     {
@@ -57,9 +72,10 @@ class Usuario
             $objAccesoDatos = AccesoDatos::obtenerInstancia();
             $consulta = $objAccesoDatos->prepararConsulta("INSERT INTO usuario (dni, clave, tipo, activo, created_at, updated_at) 
                                                                          VALUES (:dni, :clave, :tipo, :activo, :created_at, :updated_at) ");
-            $claveHash = password_hash($this->clave, PASSWORD_DEFAULT);
+            //$claveHash = password_hash($this->clave, PASSWORD_DEFAULT);
             $consulta->bindValue(':dni', $this->dni, PDO::PARAM_STR);
-            $consulta->bindValue(':clave', $claveHash);
+            //$consulta->bindValue(':clave', $claveHash);
+            $consulta->bindValue(':clave', $this->clave);
             $consulta->bindValue(':tipo', $this->tipo, PDO::PARAM_STR);
             $consulta->bindValue(':activo', '1', PDO::PARAM_STR);
             $fecha = new DateTime(date("d-m-Y H:i:s"));

@@ -1,5 +1,7 @@
 <?php
 include_once("db/AccesoDatos.php");
+include_once("importexport/CSV.php");
+
 
 class Mesa
 {
@@ -13,7 +15,19 @@ class Mesa
     {
         return $mesa->crearRegistro();
     }
-       
+
+    public static function CargarCSV($archivo)
+    {
+        $array = CSV::LeerCsv($archivo);
+        //var_dump($array);
+        for($i = 0; $i < sizeof($array); $i++)
+        {
+            $mesa = new Mesa();
+            $mesa->nombre = $array[$i];
+            $mesa->crearRegistro();
+        }
+    }
+  
     public function crearRegistro()
     {
         $retorno = null;

@@ -13,6 +13,7 @@ class ProductoAPI
             $producto = new Producto();
             $producto->id_sector = $params["sector"];
             $producto->nombre= $params["nombre"];
+            $producto->nombre= $params["precio"];
             $alta= Producto::Alta($producto);
             switch($alta)
             {

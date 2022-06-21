@@ -1,5 +1,6 @@
 <?php
 include_once("db/AccesoDatos.php");
+date_default_timezone_set('America/Buenos_Aires');
 
 class PedidoProducto
 {
@@ -28,23 +29,33 @@ class PedidoProducto
         return $retorno;
     }
 
-    public function AsignarFechaPrevista($tardanzaEnMinutos)
-    {
-        //calcular
-        //modificar en BD
+    public static function AsignarFechaPrevista($idPedidoProducto, $tardanzaEnMinutos)
+    {       
+        $pedidoProducto = AccesoDatos::retornarObjeto($idPedidoProducto, 'pedido_producto', 'PedidoProducto');
+        $fecha = new DateTime(date("d-m-Y H:i:s"));
+        $pedidoProducto->fecha_prevista = $fecha->modify('+'.$tardanzaEnMinutos.' minutes');
+        PedidoProducto::modificarRegistro($pedidoProducto);
     }
 
-    public function CambiarEstado($estado)
+    public static function CambiarEstado($idPedidoProducto, $idEstado)
     {
-        //cambiar el estado
-        //modificar en BD
+        $pedidoProducto = AccesoDatos::retornarObjeto($idPedidoProducto, 'pedido_producto', 'PedidoProducto');
+        $pedidoProducto->estado = $idEstado;
+        if($pedidoProducto->fecha_prevista == null)
+        {
+            printf("Asigne primero una fecha prevista.");
+        }
+        else
+        {
+            if($idEstado == 2)
+            {
+                $pedidoProducto->fecha_fin = new DateTime(date("d-m-Y H:i:s"));
+                $pedidoProducto->fecha_fin = $pedidoProducto->fecha_fin->format("Y-m-d H:i:s");   
+            }
+            $pedidoProducto->estado = $idEstado;
+            PedidoProducto::modificarRegistro($pedidoProducto);
+        }
     }
-
-    public function ListarPorSector($sector)
-    {
-
-    }
-
 
     public function crearRegistro() 
     {
@@ -74,9 +85,40 @@ class PedidoProducto
             return $retorno;
         }    
     }
+
+    public static function modificarRegistro($pedidoProducto)
+    {       
+        try
+        {
+            $objAccesoDato = AccesoDatos::obtenerInstancia();
+            $consulta = $objAccesoDato->prepararConsulta("UPDATE pedido_producto
+                                                          SET id_pedido = :id_pedido, 
+                                                              id_producto = :id_producto, 
+                                                              cantidad = :cantidad,
+                                                              estado = :estado, 
+                                                              fecha_prevista = :fecha_prevista,
+                                                              fecha_fin = :fecha_fin,
+                                                              activo = :activo,
+                                                              updated_at = :updated_at
+                                                          WHERE id = :id");
+            $consulta->bindValue(':id', $pedidoProducto->id, PDO::PARAM_STR);
+            $consulta->bindValue(':id_pedido', $pedidoProducto->id_pedido, PDO::PARAM_STR);
+            $consulta->bindValue(':id_producto', $pedidoProducto->id_producto, PDO::PARAM_STR);
+            $consulta->bindValue(':cantidad', $pedidoProducto->cantidad, PDO::PARAM_STR);
+            $consulta->bindValue(':estado', $pedidoProducto->estado, PDO::PARAM_STR);
+            $consulta->bindValue(':fecha_prevista', $pedidoProducto->fecha_prevista, PDO::PARAM_STR);
+            $consulta->bindValue(':fecha_fin', $pedidoProducto->fecha_fin);
+            $consulta->bindValue(':activo', $pedidoProducto->activo, PDO::PARAM_STR);
+            $fecha = new DateTime(date("d-m-Y H:i:s"));
+            $consulta->bindValue(':updated_at', date_format($fecha, 'Y-m-d H:i:s'));
+            $consulta->execute();
+        }
+        catch(Throwable $mensaje)
+        {
+            printf("Error al conectar en la base de datos: <br> $mensaje .<br>");
+        }
+    }
     
-
-
 }
 
 
