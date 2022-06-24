@@ -1,54 +1,88 @@
 <?php
 
 include_once("token/Token.php");
-
+use Psr\Http\Message\ServerRequestInterface as Request;
+use Psr\Http\Server\RequestHandlerInterface as RequestHandler;
+use Slim\Psr7\Response;
 
 class UsuarioMW
 {
-
-    public static function ValidarToken($request, $response, $next)
+    public static function ValidarToken($request, $handler)
     {
+        $header = $request->getHeaderLine('Authorization');
+        $response = new Response();
 
-        $token = $request->getHeader("token");
-        $contenidoToken = Token::LeerToken($token[0]);
-        if($contenidoToken["Estado"] == "1"){
-            $request = $request->withAttribute("payload", $contenidoToken["Mensaje"]);
-            return $next($request,$response);
+        if(!empty($header))
+        {
+            $token = trim(explode("Bearer", $header)[1]);
+            Token::verifyToken($token);
+            $response = $handler->handle($request);
         }
         else
         {
-            $newResponse = $response->withJson($contenidoToken,200);
-            return $newResponse;
+            $response->getBody()->write(json_encode(array("Token error" => "No hay token.")));
+            $response = $response->withStatus(401);
         }
+        return  $response->withHeader('Content-Type', 'application/json');
     }
 
-    public static function ValidarSocio($request,$response,$next){
-        $payload = $request->getAttribute("payload")["Payload"];
-
-        if($payload->tipo == "4")
-        {
-            return $next($request,$response);
-        }
-        else{
-            $respuesta = array("Estado" => "0", "Mensaje" => "No tienes acceso a esta funcionalidad (solo socios).");
-            $newResponse = $response->withJson($respuesta["Mensaje"],200);
-            return $newResponse;
-        }
-    }
-
-    public static function ValidarMozo($request,$response,$next)
+    public function ValidarMozo($request, $handler)
     {
-        $payload = $request->getAttribute("payload")["Payload"];
-        $tipoUsuario = $payload->tipo;
-        if($tipoUsuario == "4" || $tipoUsuario == "5")
+        try 
         {
-            return $next($request,$response);
+            $header = $request->getHeaderLine('Authorization');
+            if(!empty($header))
+            {
+                $token = trim(explode("Bearer", $header)[1]);
+                $data = Token::verifyToken($token);
+                var_dump($data);
+                if($data->tipo == "4")
+                {
+                    return $handler->handle($request);
+                }
+                throw new Exception("Usuario no autorizado");
+            }
+            else
+            {                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
+                throw new Exception("Token vacío");
+            }
+        } 
+        catch (\Throwable $th) 
+        {
+            $response = new Response();
+            $payload = json_encode(array("mensaje" => "ERROR, ".$th->getMessage()));
+            $response->getBody()->write($payload);
+            return $response->withHeader('Content-Type', 'application/json');;
         }
-        else
+    }
+
+    public function ValidarSocio($request, $handler)
+    {
+        try 
         {
-            $respuesta = array("Estado" => "0", "Mensaje" => "No tienes acceso a esta funcionalidad (solo mozos).");
-            $newResponse = $response->withJson($respuesta["Mensaje"],200);
-            return $newResponse;
+            $header = $request->getHeaderLine('Authorization');
+            if(!empty($header))
+            {
+                $token = trim(explode("Bearer", $header)[1]);
+                $data = Token::verifyToken($token);
+                var_dump($data);
+                if($data->tipo == "5")
+                {
+                    return $handler->handle($request);
+                }
+                throw new Exception("Usuario no autorizado");
+            }
+            else
+            {                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
+                throw new Exception("Token vacío");
+            }
+        } 
+        catch (\Throwable $th) 
+        {
+            $response = new Response();
+            $payload = json_encode(array("mensaje" => "ERROR, ".$th->getMessage()));
+            $response->getBody()->write($payload);
+            return $response->withHeader('Content-Type', 'application/json');;
         }
     }
 }

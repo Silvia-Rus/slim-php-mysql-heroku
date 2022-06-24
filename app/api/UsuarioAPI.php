@@ -60,8 +60,8 @@ class UsuarioAPI
             if($usuario != null)
             {
                 $token = Token::GenerarToken($usuario->id, $usuario->tipo);
-                //$respuesta = $token;
-                $respuesta = "Usuario logueado con exito";
+                $respuesta = $token;
+                //$respuesta = "Usuario logueado con exito";
             }
             else
             {
@@ -71,7 +71,6 @@ class UsuarioAPI
             $payload = json_encode($respuesta);
             $response->getBody()->write($payload);
             $newResponse = $response->withHeader('Content-Type', 'application/json');
-
         }
         catch(Throwable $mensaje)
         {
@@ -81,7 +80,6 @@ class UsuarioAPI
         {
             return $newResponse;
         }
-
     }
 
     public function Listar($request, $response, $args)
@@ -102,7 +100,6 @@ class UsuarioAPI
             return $newResponse;
         }    
     }
-
 }
 
 ?>

@@ -11,39 +11,57 @@ class Token
 
     public static function GenerarToken($idUsuario, $tipo)
     {
-        $ahora = new Datetime("now", new DateTimeZone('America/Buenos_Aires'));
-        $exp = new Datetime("now", new DateTimeZone('America/Buenos_Aires'));
-        $exp->modify('+60 days');
+        $time_now = time();
         $payload = array(
-            'iat' => $ahora,
-            'exp' => $exp,
+            'iat' => $time_now,
+            'exp' => $time_now + (60000)*24*365,
             'idUsuario' => $idUsuario,
             'tipo' => $tipo,
         );
-        return JWT::encode($payload, Token::$clave, Token::$encriptacion[0]);
+        return JWT::encode($payload, self::$clave, 'HS256');
     }
 
-    public static function LeerToken($token){
-        try
-        {            
-            $payload = JWT::decode($token, Token::$clave, Token::$encriptacion);
-            $decoded = array("Estado" => "1", "Mensaje" => "Leído.", "Payload" => $payload);
+    public static function verifyToken($token) 
+    {
+        if (empty($token)) 
+        {
+            throw new Exception("The token is empty.");
         }
-        catch(\Firebase\JWT\ExpiredException $e){
-            $mensaje = $e->getMessage();
-            $decoded = array("Estado" => "0", "Mensaje" => "$mensaje.");
+        try 
+        {
+            $decoded = JWT::decode($token, self::$clave, self::$encriptacion);
+            return $decoded;
+        } 
+        catch (Exception $e) 
+        {
+            throw $e;
         }
-        catch(\Firebase\JWT\SignatureInvalidException $e){
-            $mensaje = $e->getMessage();
-            $decoded = array("Estado" => "0", "Mensaje" => "$mensaje");
-        }
-        catch(Exception $e){
-            $mensaje = $e->getMessage();
-            $decoded = array("Estado" => "0", "Mensaje" => "$mensaje");
-        }        
-        return $decoded;
+        /*if ($decoded->aud !== self::Aud()) {
+            throw new Exception("User wrong");
+        }*/
     }
 
+    private static function Aud() {
+        $aud = '';
+
+        if(!empty($_SERVER['HTTP_CLIENT_IP'])) 
+        {
+            $aud = $_SERVER['HTTP_CLIENT_IP'];
+        } 
+        elseif(!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) 
+        {
+            $aud = $_SERVER['HTTP_X_FORWARDED_FOR'];
+        } 
+        else 
+        {
+            $aud = $_SERVER['REMOTE_ADDR'];
+        }
+
+        $aud .= @$_SERVER['HTTP_USER_AGENT'];
+        $aud .= gethostname();
+
+        return sha1($aud);
+    }
 }
 
 
