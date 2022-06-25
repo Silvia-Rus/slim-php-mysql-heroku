@@ -18,6 +18,12 @@ include_once './api/ProductoAPI.php';
 include_once './api/MesaAPI.php';
 include_once './api/PedidoAPI.php';
 include_once './api/PedidoProductoAPI.php';
+include_once './api/EncuestaAPI.php';
+include_once './api/SectorAPI.php';
+include_once './api/TipoUsuarioAPI.php';
+
+
+
 include_once './db/AccesoDatos.php';
 include_once './middlewares/UsuarioMW.php';
 
@@ -34,29 +40,55 @@ $app->get('[/]', function (Request $request, Response $response) {
 
 });
 
-//Usuarios
-$app->post('/empleados/login[/]', \UsuarioAPI::class . ':Login');  
-$app->post('/empleados/alta[/]', \UsuarioAPI::class . ':Alta');
-$app->get('/empleados/lista[/]', \UsuarioAPI::class . ':Listar');  
+//Sector
+$app->post('/sector/alta[/]', \SectorAPI::class . ':Alta');
+$app->post('/sector/modificacion[/]', \SectorAPI::class . ':Modificacion');
+$app->delete('/sector/baja/{id}[/]', \SectorAPI::class . ':Baja');
+$app->get('/sector/lista[/]', \SectorAPI::class . ':Listar');  
 
-
-//Productos 
-$app->post('/productos/alta[/]', \ProductoAPI::class . ':Alta');  
-$app->get('/productos/lista[/]', \ProductoAPI::class . ':Listar');  
-
+//TipoUsuario
+$app->post('/tipousuario/alta[/]', \TipoUsuarioAPI::class . ':Alta');
+$app->post('/tipousuario/modificacion[/]', \TipoUsuarioAPI::class . ':Modificacion');
+$app->delete('/tipousuario/baja/{id}[/]', \TipoUsuarioAPI::class . ':Baja');
+$app->get('/tipousuario/lista[/]', \TipoUsuarioAPI::class . ':Listar'); 
 
 //Mesas
 $app->post('/mesa/alta[/]', \MesaAPI::class . ':Alta'); 
-$app->get('/mesa/lista[/]', \MesaAPI::class . ':Listar');  
+$app->delete('/mesa/baja/{id}[/]', \MesaAPI::class . ':Baja');
+$app->post('/mesa/modificacion[/]', \MesaAPI::class . ':Modificacion'); 
+$app->get('/mesa/lista[/]', \MesaAPI::class . ':Listar'); 
+
 $app->get('/mesa/export[/]', \MesaAPI::class . ':ExportarTabla');  
 $app->post('/mesa/import[/]', \MesaAPI::class . ':ImportarTabla');  
 
 
+//Usuarios
+$app->post('/empleados/alta[/]', \UsuarioAPI::class . ':Alta');
+$app->delete('/empleados/baja/{id}[/]', \UsuarioAPI::class . ':Baja');
+$app->post('/empleados/modificacion[/]', \UsuarioAPI::class . ':Modificacion'); 
+$app->get('/empleados/lista[/]', \UsuarioAPI::class . ':Listar');  
+
+$app->post('/empleados/login[/]', \UsuarioAPI::class . ':Login');  
+
+
+//Productos 
+$app->post('/productos/alta[/]', \ProductoAPI::class . ':Alta'); 
+$app->delete('/productos/baja/{id}[/]', \ProductoAPI::class . ':Baja');
+$app->post('/productos/modificacion[/]', \ProductoAPI::class . ':Modificacion');  
+$app->get('/productos/lista[/]', \ProductoAPI::class . ':Listar');  
+
 
 //Pedido
-$app->post('/pedido/nuevopedido[/]', \PedidoAPI::class . ':Alta')
+$app->post('/pedido/alta[/]', \PedidoAPI::class . ':Alta')
 ->add(\UsuarioMW::class. ':ValidarMozo')
 ->add(\UsuarioMW::class. ':ValidarToken');
+$app->delete('/pedido/baja/{id}[/]', \PedidoAPI::class . ':Baja');
+
+$app->post('/pedido/nuevopedido[/]', \PedidoAPI::class . ':Alta');
+
+
+
+
 $app->post('/pedido/aniadirProducto[/]', \PedidoProductoAPI::class . ':Alta'); 
 $app->post('/pedido/comiendo[/]', \PedidoAPI::class . ':PasarAComiendo'); 
 $app->post('/pedido/pagando[/]', \PedidoAPI::class . ':PasarAPagando'); 
@@ -65,6 +97,7 @@ $app->post('/pedido/asignarfecha[/]', \PedidoProductoAPI::class . ':AsignarFecha
 $app->post('/pedido/enpreparacion[/]', \PedidoProductoAPI::class . ':PedidoEnPreparacion'); 
 $app->post('/pedido/listo[/]', \PedidoProductoAPI::class . ':PedidoListo'); 
 
+$app->post('/encuesta/nuevaEncuesta[/]', \EncuestaAPI::class . ':Alta'); 
 
 
 $app->get('/pedido/lista[/]', \PedidoAPI::class . ':Listar');  

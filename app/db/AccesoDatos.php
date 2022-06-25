@@ -39,20 +39,39 @@ class AccesoDatos
         trigger_error('ERROR: La clonación de este objeto no está permitida', E_USER_ERROR);
     }
 
-    public static function borrarRegistro($id, $tabla)
+    public static function ObtenerConsulta($sql, $clase = null)
+    {
+        try
+        {
+            $conexion = AccesoDatos::obtenerInstancia();
+            $consulta = $conexion->prepararConsulta($sql);
+            $consulta->execute();
+            $retorno = $consulta->fetchAll(PDO::FETCH_CLASS, $clase);
+            
+        }
+        catch(Throwable $mensaje)
+        {
+            printf("Error de la BD: <br> $mensaje .<br>");
+        }
+        finally
+        {
+            return $retorno;
+        }    
+    }
+
+    public static function modificarCampo($id, $tabla, $campo, $valor)
     {
         $retorno = false;
         try
         {   
-            if($id != null)
+            if($id != null && $campo != 'id')
             {
                 $conexion = AccesoDatos::obtenerInstancia();
-                $consulta = $conexion->prepaparConsulta("UPDATE $tabla 
-                                                         SET activo = :activo, updated_at = :updated_at
-                                                         WHERE id = :id");
+                $consulta = $conexion->prepararConsulta("UPDATE $tabla 
+                                                         SET $campo = $valor, updated_at = :updated_at 
+                                                         WHERE id = $id");
                 $fecha = new DateTime(date("d-m-Y"));
                 $consulta->bindValue(':updated_at', date_format($fecha, 'Y-m-d H:i:s'));
-                $consulta->bindValue(':activo', '0');
                 $consulta->execute();
                 $retorno = true;
             }
@@ -67,96 +86,39 @@ class AccesoDatos
         }
     }
 
-    public static function retornarObjeto($id, $tabla, $clase)
+    public static function borrarRegistro($id, $tabla)
     {
-        $retorno = null;
-        try
-        {
-            $conexion = AccesoDatos::obtenerInstancia();
-            $consulta = $conexion->prepararConsulta("SELECT * FROM $tabla WHERE $id = $tabla.id");
-            $consulta->execute();
-            $resultado = $consulta->fetchObject($clase);
-            $retorno = $resultado;          
-        }
-        catch(Throwable $mensaje)
-        {
-            printf("Error al buscar en la base de datos: <br> $mensaje .<br>");
-        }
-        finally
-        {
-            return $retorno;
-        }
+        return AccesoDatos::modificarCampo($id, $tabla, 'activo', '0');
     }
 
-    public static function retornarIdPorCampo($valor, $campo, $tabla, $clase)
+    public static function retornarObjeto($id, $tabla, $clase)
     {
-        $consulta = "SELECT * FROM $tabla WHERE $tabla.$campo = '$valor'";
-        //var_dump($consulta);
-        $retorno = null;
-        try
-        {
-            $conexion = AccesoDatos::obtenerInstancia();
-            $consulta = $conexion->prepararConsulta($consulta);
-            $consulta->execute();
-            $resultado = $consulta->fetchObject($clase);
-            if($resultado != null)
-            {
-                $retorno = $resultado->id;          
-            }
-            /*$resultado = $consulta->fetchAll();
-            if(sizeof($resultado) > 0)
-            {
-                $retorno = $resultado[0]["id"];
-            }*/
-        }
-        catch(Throwable $mensaje)
-        {
-            printf("Error al buscar en la base de datos: <br> $mensaje .<br>");
-        }
-        finally
-        {
-            return $retorno;
-        }
+        $sql = "SELECT * FROM $tabla WHERE $id = $tabla.id";
+        return AccesoDatos::ObtenerConsulta($sql, $clase);
+    }
+
+    public static function retornarObjetoActivo($id, $tabla, $clase)
+    {
+        $sql = "SELECT * FROM $tabla WHERE $id = $tabla.id AND $tabla.activo = 1";
+        return AccesoDatos::ObtenerConsulta($sql, $clase);
+    }
+
+    public static function retornarObjetoPorCampo($valor, $campo, $tabla, $clase)
+    {
+        $sql = "SELECT * FROM $tabla WHERE $tabla.$campo = '$valor'";
+        return AccesoDatos::ObtenerConsulta($sql, $clase);
+    }
+
+    public static function retornarObjetoActivoPorCampo($valor, $campo, $tabla, $clase)
+    {
+        $sql = "SELECT * FROM $tabla WHERE $tabla.$campo = '$valor' AND $tabla.activo = 1";
+        return AccesoDatos::ObtenerConsulta($sql, $clase);
     }
 
     public static function obtenerTodos($tabla, $clase)
     {
-        $retorno = null;
-        try
-        {
-            $conexion = AccesoDatos::obtenerInstancia();
-            $consulta = $conexion->prepararConsulta("SELECT * FROM $tabla");
-            $consulta->execute();
-            $retorno = $consulta->fetchAll(PDO::FETCH_CLASS, $clase);
-        }
-        catch(Throwable $mensaje)
-        {
-            printf("Error al buscar en la base de datos: <br> $mensaje .<br>");
-        }
-        finally
-        {
-            return $retorno;
-        }   
-    }
-
-    public static function ObtenerConsulta($sql)
-    {
-        try
-        {
-            $conexion = AccesoDatos::obtenerInstancia();
-            $consulta = $conexion->prepararConsulta($sql);
-            $consulta->execute();
-            $retorno = $consulta->fetchAll();
-        }
-        catch(Throwable $mensaje)
-        {
-            printf("Error al buscar en la base de datos: <br> $mensaje .<br>");
-        }
-        finally
-        {
-            return $retorno;
-        } 
-        
+        $sql = "SELECT * FROM $tabla;";
+        return AccesoDatos::ObtenerConsulta($sql, $clase);
     }
 
     public static function ObtenerPedidosPorSector($sector)
@@ -178,62 +140,7 @@ class AccesoDatos
                 ORDER BY pp.id_pedido, pp.created_at;";
          
         return AccesoDatos::ObtenerConsulta($sql);
-        /*try
-        {
-            $conexion = AccesoDatos::obtenerInstancia();
-            $consulta = $conexion->prepararConsulta("SELECT pp.id,
-                                                            pp.id_pedido AS pedido, 
-                                                            pr.nombre AS producto, 
-                                                            pp.cantidad AS cantidad, 
-                                                            CASE 
-                                                            WHEN pp.estado = 0 THEN 'Pendiente' 
-                                                            WHEN pp.estado = 1 THEN 'En preparación' 
-                                                            WHEN pp.estado = 2 THEN 'Listo' 
-                                                            ELSE 'Error' end
-                                                            as Estado 
-                                                    FROM pedido_producto pp 
-                                                        LEFT JOIN producto pr ON pp.id_producto = pr.id
-                                                        LEFT JOIN sector s ON pr.id_sector = s.id
-                                                    WHERE s.id = $sector and pp.estado < 3
-                                                    ORDER BY pp.id_pedido, pp.created_at;");
-            $consulta->execute();
-            $retorno = $consulta->fetchAll(PDO::FETCH_CLASS);
-        }
-        catch(Throwable $mensaje)
-        {
-            printf("Error al buscar en la base de datos: <br> $mensaje .<br>");
-        }
-        finally
-        {
-            return $retorno;
-        }*/
-    }
 
-    public static function modificarCampo($id, $tabla, $campo, $valor)
-    {
-        $retorno = false;
-        try
-        {   
-            if($id != null && $campo != 'id')
-            {
-                $conexion = AccesoDatos::obtenerInstancia();
-                $consulta = $conexion->prepaparConsulta("UPDATE $tabla 
-                                                         SET $campo = $valor, updated_at = :updated_at 
-                                                         WHERE id = $id");
-                $fecha = new DateTime(date("d-m-Y"));
-                $consulta->bindValue(':updated_at', date_format($fecha, 'Y-m-d H:i:s'));
-                $consulta->execute();
-                $retorno = true;
-            }
-        }
-        catch(Throwable $mensaje)
-        {
-            printf("Error al borrar en la base de datos: <br> $mensaje .<br>");
-        }
-        finally
-        {
-            return $retorno;
-        }
     }
 
     public static function ImprimirTabla($tabla, $clase)
@@ -257,31 +164,4 @@ class AccesoDatos
         }  
     }
 
-    /*public static function ImprimirArray($array)
-    {
-        if(sizeof($array) == 0 || $array == null)
-        {
-            print "\t<td>Sin datos disponibles.</td>\n";
-            print "</tr>\n";
-        }
-        else
-        { 
-            foreach ($array as $fila) 
-            {
-                foreach ($fila as $columna) 
-                {
-                    if($columna == null)
-                    {
-                        print "\t<td>Sin datos disponibles.</td>\n";
-                    }
-                    else
-                    {
-                        print "\t<td>$columna</td>\n";
-                    }
-                    print "\t<td>$columna</td>\n";
-                }
-                print "</tr>\n";
-            } 
-        }       
-    }*/
 }

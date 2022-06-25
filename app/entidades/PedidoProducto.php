@@ -1,8 +1,10 @@
 <?php
 include_once("db/AccesoDatos.php");
+//require_once '/interfaces/IEntidad.php';
 date_default_timezone_set('America/Buenos_Aires');
 
-class PedidoProducto
+class PedidoProducto 
+//implements IEntidad
 {
     public $id;
     public $id_pedido;
@@ -18,12 +20,29 @@ class PedidoProducto
     public static function Alta($pedidoProducto)
     {
         $id_pedidoAux = Pedido::idPedidoAPartirDeMesa($pedidoProducto->id_pedido); 
-        
         $retorno = 0;
         if($id_pedidoAux != null)
         {
             $pedidoProducto->id_pedido = $id_pedidoAux;
             $pedidoProducto->crearRegistro();
+            $retorno = 1;
+        }
+        return $retorno;
+    }
+
+    public static function Baja($pedidoProducto)
+    {
+        return AccesoDatos::borrarRegistro($pedidoProducto->id, 'pedido');
+    }
+
+    public static function Modificacion($pedidoProducto)
+    {
+        $id_pedidoAux = Pedido::idPedidoAPartirDeMesa($pedidoProducto->id_pedido); 
+        $retorno = 0;
+        if($id_pedidoAux != null)
+        {
+            $pedidoProducto->id_pedido = $id_pedidoAux;
+            PedidoProducto::modificarRegistro($pedidoProducto);
             $retorno = 1;
         }
         return $retorno;

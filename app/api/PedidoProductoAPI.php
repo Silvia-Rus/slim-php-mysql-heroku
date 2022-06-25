@@ -138,7 +138,6 @@ class PedidoProductoAPI
         {
             return $newResponse;
         }    
-
     }
 
     public function PedidoEnPreparacion($request, $response, $args)

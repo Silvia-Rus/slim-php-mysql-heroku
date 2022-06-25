@@ -47,6 +47,82 @@ class UsuarioAPI
         }
     }
 
+    
+    public function Modificacion($request, $response, $args)
+    {
+        try
+        {
+            $params = $request->getParsedBody();
+            $usuario = new Usuario();
+            $usuario->id = $params["id"];
+            $usuario->tipo = $params["tipo"];
+            $usuario->dni = $params["dni"];
+            $usuario->clave = $params["clave"];
+            $modificacion = Usuario::Modificacion($usuario);
+
+            switch($modificacion)
+            {
+                case 1:
+                    $respuesta = "Usuario modificado con éxito.";
+                    break;
+                case 2:
+                    $respuesta = "El DNI ya existe en la base de datos.";
+                    break;
+                case 3:
+                    $respuesta = "Este ID no corresponde a ningún usuario";
+                    break;
+                default:
+                    $respuesta = "Nunca llega a la modificacion";
+            }    
+            $payload = json_encode($respuesta);
+            $response->getBody()->write($payload);
+            $newResponse = $response->withHeader('Content-Type', 'application/json');
+        }
+        catch(Throwable $mensaje)
+        {
+            printf("Error al modificar: <br> $mensaje .<br>");
+        }
+        finally
+        {
+            return $newResponse;
+        }
+    }
+
+    public function Baja($request, $response, $args)
+    {
+        try
+        {
+            //var_dump($args);
+            $idDelUsuario = $args["id"];
+            $modificacion = Usuario::Baja($idDelUsuario);
+            switch($modificacion)
+            {
+                case 0:
+                    $respuesta = "No existe este Usuario.";
+                    break;
+                case 1:
+                    $respuesta = "Usuario borrado con éxito.";
+                    break;
+                case 2:
+                    $respuesta = "No se puede borrar (Tiene pedidos pendientes).";
+                    break;
+                default:
+                    $respuesta = "Nunca llega a la modificacion";
+            }    
+            $payload = json_encode($respuesta);
+            $response->getBody()->write($payload);
+            $newResponse = $response->withHeader('Content-Type', 'application/json');
+        }
+        catch(Throwable $mensaje)
+        {
+            printf("Error al dar de baja: <br> $mensaje .<br>");
+        }
+        finally
+        {
+            return $newResponse;
+        }
+    }
+
     public function Login($request, $response, $args)
     {
         try

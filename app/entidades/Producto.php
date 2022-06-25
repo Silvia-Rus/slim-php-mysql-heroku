@@ -1,8 +1,10 @@
 <?php
 include_once("db/AccesoDatos.php");
-include_once("entidades/Sector.php");
+//include_once("entidades/Sector.php");
+//require_once '/interfaces/IEntidad.php';
 
-class Producto
+class Producto 
+//implements IEntidad
 {
     public $id;
     public $id_sector;
@@ -14,29 +16,62 @@ class Producto
     public static function Alta($producto)
     {
         $retorno = -1;
-        $idDelSector = AccesoDatos::retornarIdPorCampo($producto->id_sector, "nombre", "sector", "Sector");
-        $idDelProducto =  AccesoDatos::retornarIdPorCampo($producto->nombre, "nombre", "producto", "Producto");
-
-        if($idDelSector == null)
+        //var_dump($producto);
+        $sectorAux = AccesoDatos::retornarObjetoActivoPorCampo($producto->id_sector, "nombre", "sector", "Sector");
+        //var_dump($sectorAux);
+        if($sectorAux == null)
         {
             $retorno = 0;
         }
         else
         {
-            if($idDelProducto != null)
+            $productoAux =  AccesoDatos::retornarObjetoPorCampo($producto->nombre, "nombre", "producto", "Producto");
+
+            if($productoAux != null)
             {               
-                $productoAux = AccesoDatos::retornarObjeto($idDelProducto, "producto", "Producto");
-                $productoAux->id_sector = $idDelSector;
-                $productoAux->precio = $producto->precio;
+                $productoAux[0]->id_sector = $sectorAux[0]->id;
+                $productoAux[0]->precio = $producto->precio;
                 // var_dump($productoAux);
-                Producto::modificarRegistro($productoAux);
+                Producto::modificarRegistro($productoAux[0]);
                 $retorno = 1;
             }
             else
             {
-                $producto->id_sector = $idDelSector;
+                $producto->id_sector = $sectorAux[0]->id;
                 $producto->crearRegistro();
                 $retorno = 2;
+            }
+        }
+        return $retorno;
+    }
+
+    public static function Baja($id)
+    { 
+        $retorno = 0;
+        $productoAux = AccesoDatos::retornarObjetoActivo($id, 'producto', 'Producto');
+
+        if($productoAux != null)
+        {
+            AccesoDatos::borrarRegistro($id, 'producto');
+            $retorno = 1;
+        }         
+        return $retorno;
+    }
+
+    public static function Modificacion($producto)
+    {
+        $retorno = 3;
+        $productoAux = AccesoDatos::retornarObjetoActivo($producto->id, 'producto', 'Producto');
+
+        if($productoAux != null)
+        {
+            $productoAuxNombre = AccesoDatos::retornarObjetoPorCampo($producto->nombre, 'nombre', 'producto', 'Producto');
+            $retorno = 2; //es el mismo nombre
+            if($productoAuxNombre == null)
+            {
+                $producto->activo = 1;
+                Producto::modificarRegistro($producto);
+                $retorno = 1; //se cambia el nombre 
             }
         }
         return $retorno;
@@ -74,6 +109,7 @@ class Producto
     {
         try
         {
+
             $objAccesoDato = AccesoDatos::obtenerInstancia();
             $consulta = $objAccesoDato->prepararConsulta("UPDATE producto
                                                           SET nombre = :nombre, 
@@ -88,13 +124,11 @@ class Producto
             $fecha = new DateTime(date("d-m-Y H:i:s"));
             $consulta->bindValue(':updated_at', date_format($fecha, 'Y-m-d H:i:s'));
             $consulta->execute();
-
         }
         catch(Throwable $mensaje)
         {
              printf("Error al conectar en la base de datos: <br> $mensaje .<br>");
         }
-
     }
 }
 

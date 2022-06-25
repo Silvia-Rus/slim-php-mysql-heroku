@@ -1,7 +1,10 @@
 <?php
 include_once("db/AccesoDatos.php");
+//require_once '/interfaces/IEntidad.php';
 
-class Pedido
+
+class Pedido 
+//implements IEntidad
 {
     public $id;
     public $id_mesa;
@@ -27,6 +30,54 @@ class Pedido
         return $retorno;
     }
 
+    public static function Baja($id)
+    {
+        $retorno = 0;
+        $pedidoAux = AccesoDatos::retornarObjeto($id, 'pedido', 'Pedido');
+
+        if($pedidoAux != null && $pedidoAux->activo == 1)
+        {
+            AccesoDatos::borrarRegistro($id, 'pedido');
+            $retorno = 1;
+        }         
+        return $retorno;
+    }
+
+    public static function Modificacion($pedido)
+    {
+        $retorno = 0;
+        /*$pedidoAux = AccesoDatos::retornarObjeto($pedido->id, 'pedido', 'Pedido');
+
+        if($pedidoAux != null || $pedidoAux->activo == 1)
+        {
+            $idMesaAux = Pedido::idPedidoAPartirDeMesa($pedido->id_mesa); //si la mesa está ocupada
+
+            if($idMesaAux != null)           //que la mesa no esté ocupada
+            {
+                $mesa = AccesoDatos::retornarObjeto($idMesaAux, 'mesa', 'Mesa');
+                if($mesa->activo == 1)  //que la mesa no esté borrada
+                {
+
+
+                }
+                //que la mesa sea distinta a la que está
+                $mesa->activo = $mesaAux->activo;
+                Pedido::modificarRegistro($pedido);
+                $retorno = 1; //se cambia el nombre 
+            }
+            else
+            {
+                $retorno = 2; //es el mismo nombre
+            }
+        }
+        else
+        {
+            $retorno = 3; //no existe el pedido
+        }*/
+
+        return $retorno;
+    }
+
     public static function CambiarEstado($mesa, $idEstado)
     {
         $idPedido = Pedido::idPedidoAPartirDeMesa($mesa);
@@ -38,7 +89,6 @@ class Pedido
             $pedido->fecha_fin = new DateTime(date("d-m-Y H:i:s"));
             $pedido->fecha_fin =  $pedido->fecha_fin->format("Y-m-d H:i:s");  
         }
-
         Pedido::modificarRegistro($pedido);
     }
 

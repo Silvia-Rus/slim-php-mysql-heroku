@@ -41,7 +41,8 @@ class Token
         }*/
     }
 
-    private static function Aud() {
+    private static function Aud() 
+    {
         $aud = '';
 
         if(!empty($_SERVER['HTTP_CLIENT_IP'])) 

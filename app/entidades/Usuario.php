@@ -1,8 +1,11 @@
 <?php
 include_once("db/AccesoDatos.php");
-include_once("entidades/TipoUsuario.php");
+//include_once("entidades/TipoUsuario.php");
+include_once("entidades/Log.php");
+//require_once '/interfaces/IEntidad.php';
 
-class Usuario
+class Usuario 
+//implements IEntidad
 {
     public $id;
     public $dni;
@@ -12,35 +15,29 @@ class Usuario
     public $created_at;
     public $updated_at;
     
-    /*public function __construct($dni, $clave, $tipo)
-    {
-        $this->dni = $dni;
-        $this->clave = $clave;
-        $this->tipo = $tipo;
-    }*/
-
     public static function Alta($usuario)
     {
         $retorno = -1;
-        $idDelTipo = AccesoDatos::retornarIdPorCampo($usuario->tipo, "nombre", "tipo_usuario", "TipoUsuario");
-        $idDelUsuario =  AccesoDatos::retornarIdPorCampo($usuario->dni, "dni", "usuario", "Usuario");
+        //comprobar si existe el tipo
+        $tipoAux= AccesoDatos::retornarObjetoActivoPorCampo($usuario->tipo, "nombre", "tipo_usuario", "TipoUsuario");
+        //comprobar si existe el usuario
+        $usuarioAux =  AccesoDatos::retornarObjetoPorCampo($usuario->dni, "dni", "usuario", "Usuario");
 
-        if($idDelTipo == null)
+        if($tipoAux== null)
         {
             $retorno = 0;
         }
         else
         {
-            if($idDelUsuario != null)
+            if($usuarioAux != null)
             {
-                $usuarioAux = AccesoDatos::retornarObjeto($idDelUsuario, "usuario", "Usuario");
-                $usuarioAux->tipo = $idDelTipo;
-                Usuario::modificarRegistro($usuarioAux);
+                $usuarioAux[0]->tipo = $tipoAux[0]->id;
+                Usuario::modificarRegistro($usuarioAux[0]);
                 $retorno = 1;
             }
             else
             {
-                $usuario->tipo = $idDelTipo;
+                $usuario->tipo = $tipoAux[0]->id;
                 //var_dump($usuario->tipo);
                 $usuario->crearRegistro();
                 $retorno = 2;
@@ -49,20 +46,83 @@ class Usuario
         return $retorno;
     }
 
-    public static function Login($dni, $clave)
-    {
-        $retorno = null;
-        $idDni = AccesoDatos::retornarIdPorCampo($dni, 'dni', 'usuario', 'Usuario');
-        if($idDni != null)
-        {
-            $usuario = AccesoDatos::retornarObjeto($idDni, 'usuario', 'Usuario');
-            if($clave == $usuario->clave)
+    public static function Baja($id)
+    { 
+        $retorno = 0;
+        $usuarioAux = AccesoDatos::retornarObjetoActivo($id, 'usuario', 'Usuario');
+
+        if($usuarioAux != null)
+        {           
+            $tienePedidosPendientes = Usuario::TienePedidosPendientes($usuarioAux[0]);
+            $retorno = 2;
+            if($tienePedidosPendientes == 0)
             {
-                $retorno = $usuario;
+                AccesoDatos::borrarRegistro($id, 'usuario');
+                $retorno = 1;
+            }
+        }         
+        return $retorno;
+    }
+
+    public static function Modificacion($usuario)
+    {
+        $retorno = 3;
+    
+        $usuarioAux = AccesoDatos::retornarObjetoActivo($usuario->id, 'usuario', 'Usuario');
+        if($usuarioAux != null)
+        {
+            $usuarioAuxDNI = AccesoDatos::retornarObjetoPorCampo($usuario->dni, 'dni', 'usuario', 'Usuario');
+            $retorno = 2; //es el mismo nombre
+            if($usuarioAuxDNI  == null)
+            {
+                $usuario->activo = 1;
+                Usuario::modificarRegistro($usuario);
+                $retorno = 1; //se cambia el nombre 
             }
         }
         return $retorno;
     }
+
+    public static function Login($dni, $clave)
+    {
+        $retorno = null;
+        $idDni = AccesoDatos::retornarObjetoActivoPorCampo($dni, 'dni', 'usuario', 'Usuario');
+        var_dump($idDni);
+        if($idDni != null)
+        {
+            if($clave == $idDni[0]->clave)
+            {
+                $log = new Log($idDni[0]->id, 'Login');
+                Log::Alta($log);
+                $retorno = $idDni[0];
+            }
+        }
+        return $retorno;
+    }
+
+    public static function TienePedidosPendientes($usuario)
+    {
+
+        $retorno = 1;
+        $sqlEnPedido = "SELECT * FROM pedido WHERE id_usuario = $usuario->id 
+                                                   AND activo = '1'
+                                                   AND estado < 4;";
+        $enPedido = AccesoDatos::ObtenerConsulta($sqlEnPedido, 'Pedido');
+
+        $sqlEnPedidoProducto = "SELECT * FROM pedido_producto WHERE id_usuario = $usuario->id 
+                                                                    AND activo = '1'
+                                                                    AND estado < 3;";
+        $enPedidoProducto = AccesoDatos::ObtenerConsulta($sqlEnPedidoProducto, 'PedidoProducto');
+
+        if(sizeof($enPedido) == 0 && sizeof($enPedidoProducto) == 0)
+        {
+            $retorno = 0;
+        }
+
+        return $retorno;
+    }
+
+
     //Manejo BD
     public function crearRegistro()
     {
@@ -106,10 +166,10 @@ class Usuario
                                                               activo = :activo,
                                                               updated_at = :updated_at
                                                           WHERE id = :id");
-            $claveHash = password_hash($usuario->clave, PASSWORD_DEFAULT);
+            //$claveHash = password_hash($usuario->clave, PASSWORD_DEFAULT);
             $consulta->bindValue(':id', $usuario->id, PDO::PARAM_STR);
             $consulta->bindValue(':dni', $usuario->dni, PDO::PARAM_STR);
-            $consulta->bindValue(':clave', $claveHash);
+            $consulta->bindValue(':clave', $usuario->clave);
             $consulta->bindValue(':tipo', $usuario->tipo, PDO::PARAM_STR);
             $consulta->bindValue(':activo', '1', PDO::PARAM_STR);
             $fecha = new DateTime(date("d-m-Y H:i:s"));

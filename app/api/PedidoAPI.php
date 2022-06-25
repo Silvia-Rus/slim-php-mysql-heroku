@@ -41,6 +41,40 @@ class PedidoAPI
         }
     }
 
+
+    public function Baja($request, $response, $args)
+    {
+        try
+        {
+            //var_dump($args);
+            $idDelPedido = $args["id"];
+            $modificacion = Pedido::Baja($idDelPedido);
+            switch($modificacion)
+            {
+                case 0:
+                    $respuesta = "No existe este pedido.";
+                    break;
+                case 1:
+                    $respuesta = "Pedido borrado con éxito.";
+                    break;
+                default:
+                    $respuesta = "Nunca llega a la modificacion";
+            }    
+            $payload = json_encode($respuesta);
+            $response->getBody()->write($payload);
+            $newResponse = $response->withHeader('Content-Type', 'application/json');
+        }
+        catch(Throwable $mensaje)
+        {
+            printf("Error al dar de baja: <br> $mensaje .<br>");
+        }
+        finally
+        {
+            return $newResponse;
+        }
+    }
+
+
     public function Listar($request, $response, $args)
     {
         try

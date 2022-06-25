@@ -35,7 +35,6 @@ class UsuarioMW
             {
                 $token = trim(explode("Bearer", $header)[1]);
                 $data = Token::verifyToken($token);
-                var_dump($data);
                 if($data->tipo == "4")
                 {
                     return $handler->handle($request);
@@ -65,7 +64,6 @@ class UsuarioMW
             {
                 $token = trim(explode("Bearer", $header)[1]);
                 $data = Token::verifyToken($token);
-                var_dump($data);
                 if($data->tipo == "5")
                 {
                     return $handler->handle($request);
