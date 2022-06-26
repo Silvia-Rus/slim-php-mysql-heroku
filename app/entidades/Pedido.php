@@ -1,6 +1,7 @@
 <?php
 include_once("db/AccesoDatos.php");
 //require_once '/interfaces/IEntidad.php';
+date_default_timezone_set('America/Buenos_Aires');
 
 
 class Pedido 
@@ -21,11 +22,20 @@ class Pedido
     
     public static function Alta($pedido)
     {
-        $retorno = 0;
-        $idAux = Pedido::idPedidoAPartirDeMesa($pedido->id_mesa);
-        if($idAux == null && $pedido->crearRegistro() != null)
+        $retorno = 0; //No se generó el pedido pues la mesa está ocupada
+        //var_dump($pedido);
+
+        $idMesaAux = AccesoDatos::retornarObjetoActivoPorCampo($pedido->id_mesa, 'id_mesa', 'pedido', 'Pedido');
+        //var_dump($idMesaAux);
+        if(sizeof($idMesaAux) == 0)
         {
-            $retorno = 1;
+            $idUsuarioAux = AccesoDatos::retornarObjetoActivoPorCampo($pedido->id_usuario, 'id', 'usuario', 'Usuario');
+            $retorno = 2;
+            if(sizeof($idUsuarioAux) > 0)
+            {
+                $pedido->crearRegistro();
+                $retorno = 1;
+            }
         }
         return $retorno;
     }
@@ -33,10 +43,11 @@ class Pedido
     public static function Baja($id)
     {
         $retorno = 0;
-        $pedidoAux = AccesoDatos::retornarObjeto($id, 'pedido', 'Pedido');
+        $pedidoAux = AccesoDatos::retornarObjetoActivo($id, 'pedido', 'Pedido');
 
-        if($pedidoAux != null && $pedidoAux->activo == 1)
+        if($pedidoAux != null)
         {
+            AccesoDatos::borrarPorCondicion($pedidoAux[0]->id, 'id_pedido', 'pedido_producto');
             AccesoDatos::borrarRegistro($id, 'pedido');
             $retorno = 1;
         }         
@@ -46,41 +57,31 @@ class Pedido
     public static function Modificacion($pedido)
     {
         $retorno = 0;
-        /*$pedidoAux = AccesoDatos::retornarObjeto($pedido->id, 'pedido', 'Pedido');
-
-        if($pedidoAux != null || $pedidoAux->activo == 1)
+        $pedidoAux = AccesoDatos::retornarObjetoActivo($pedido->id, 'pedido', 'Pedido');
+        if(sizeof($pedidoAux) > 0)
         {
-            $idMesaAux = Pedido::idPedidoAPartirDeMesa($pedido->id_mesa); //si la mesa está ocupada
-
-            if($idMesaAux != null)           //que la mesa no esté ocupada
-            {
-                $mesa = AccesoDatos::retornarObjeto($idMesaAux, 'mesa', 'Mesa');
-                if($mesa->activo == 1)  //que la mesa no esté borrada
+            $mesaAux = AccesoDatos::retornarObjetoActivoPorCampo($pedido->id_mesa, 'id_mesa', 'pedido', 'Pedido');
+            $mesaAuxEnMesa = AccesoDatos::retornarObjetoActivoPorCampo($pedido->id_mesa, 'id', 'mesa', 'Mesa');
+            $retorno = 1; 
+            if($mesaAux == null && $mesaAuxEnMesa != null)
+            {                             
+                $idUsuarioAux = AccesoDatos::retornarObjetoActivoPorCampo($pedido->id_usuario, 'id', 'usuario', 'Usuario');
+                $retorno = 3;
+                if(sizeof($idUsuarioAux) > 0)
                 {
-
-
+                    $pedidoAux[0]->id_mesa = $pedido->id_mesa;
+                    $pedidoAux[0]->id_usuario = $pedido->id_usuario;
+                    Pedido::modificarRegistro($pedidoAux[0]);
+                    $retorno = 2; 
                 }
-                //que la mesa sea distinta a la que está
-                $mesa->activo = $mesaAux->activo;
-                Pedido::modificarRegistro($pedido);
-                $retorno = 1; //se cambia el nombre 
-            }
-            else
-            {
-                $retorno = 2; //es el mismo nombre
             }
         }
-        else
-        {
-            $retorno = 3; //no existe el pedido
-        }*/
-
         return $retorno;
     }
 
     public static function CambiarEstado($mesa, $idEstado)
     {
-        $idPedido = Pedido::idPedidoAPartirDeMesa($mesa);
+        /*$idPedido = Pedido::idPedidoAPartirDeMesa($mesa);
         $pedido = AccesoDatos::retornarObjeto($idPedido, 'pedido', 'Pedido');
         $pedido->estado = $idEstado;
         if($idEstado == 4)
@@ -89,7 +90,7 @@ class Pedido
             $pedido->fecha_fin = new DateTime(date("d-m-Y H:i:s"));
             $pedido->fecha_fin =  $pedido->fecha_fin->format("Y-m-d H:i:s");  
         }
-        Pedido::modificarRegistro($pedido);
+        Pedido::modificarRegistro($pedido);*/
     }
 
     public static function CalcularPrecio($mesa)
@@ -116,41 +117,17 @@ class Pedido
         return $precio;
     }
 
-    public static function idPedidoAPartirDeMesa($id)
-    {
-        $retorno = null;
-
-        try
-        {
-            $conexion = AccesoDatos::obtenerInstancia();
-            $consulta = $conexion->prepararConsulta("SELECT * FROM pedido WHERE id_mesa = $id and estado not like '4';");
-            $consulta->execute();
-            $resultado = $consulta->fetchObject("Pedido");
-            if($resultado != null)
-            {
-                $retorno = $resultado->id;
-            }         
-        }
-        catch(Throwable $mensaje)
-        {
-            printf("Error al buscar en la base de datos: <br> $mensaje .<br>");
-        }
-        finally
-        {
-            return $retorno;
-        }  
-    }
-
     public function crearRegistro() 
     {
         $retorno = null;
         try
         {
             $objAccesoDatos = AccesoDatos::obtenerInstancia();
-            $consulta = $objAccesoDatos->prepararConsulta("INSERT INTO  pedido (id_mesa, id_cliente, estado, created_at, fecha_prevista, updated_at, activo) 
-                                                                  VALUES (:id_mesa, :id_cliente, :estado, :created_at, :fecha_prevista, :updated_at, :activo)");
+            $consulta = $objAccesoDatos->prepararConsulta("INSERT INTO  pedido (id_mesa, id_cliente, id_usuario, estado, created_at, fecha_prevista, updated_at, activo) 
+                                                                  VALUES (:id_mesa, :id_cliente, :id_usuario, :estado, :created_at, :fecha_prevista, :updated_at, :activo)");
             $consulta->bindValue(':id_mesa', $this->id_mesa, PDO::PARAM_STR);
             $consulta->bindValue(':id_cliente', $this->id_cliente, PDO::PARAM_STR); 
+            $consulta->bindValue(':id_usuario', $this->id_usuario, PDO::PARAM_STR); 
             $consulta->bindValue(':estado', '1', PDO::PARAM_STR); 
             $consulta->bindValue(':activo', '1', PDO::PARAM_STR);
             $fecha = new DateTime(date("d-m-Y H:i:s"));
@@ -179,7 +156,8 @@ class Pedido
             $objAccesoDato = AccesoDatos::obtenerInstancia();
             $consulta = $objAccesoDato->prepararConsulta("UPDATE pedido
                                                           SET id_mesa = :id_mesa, 
-                                                              id_cliente = :id_cliente, 
+                                                              id_cliente = :id_cliente,
+                                                              id_usuario = :id_usuario, 
                                                               estado = :estado, 
                                                               fecha_fin = :fecha_fin,
                                                               precio_final = :precio_final,
@@ -190,10 +168,10 @@ class Pedido
             $consulta->bindValue(':id', $pedido->id, PDO::PARAM_STR);
             $consulta->bindValue(':id_mesa', $pedido->id_mesa, PDO::PARAM_STR);
             $consulta->bindValue(':id_cliente', $pedido->id_cliente, PDO::PARAM_STR);
+            $consulta->bindValue(':id_usuario', $pedido->id_usuario);
             $consulta->bindValue(':estado', $pedido->estado, PDO::PARAM_STR);
             $consulta->bindValue(':fecha_fin', $pedido->fecha_fin);
             $consulta->bindValue(':precio_final', $pedido->precio_final);
-
             $consulta->bindValue(':activo', $pedido->activo, PDO::PARAM_STR);
             $consulta->bindValue(':foto', $pedido->foto, PDO::PARAM_STR);
             $fecha = new DateTime(date("d-m-Y H:i:s"));

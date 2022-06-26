@@ -12,7 +12,7 @@ class PedidoProductoAPI
             $params = $request->getParsedBody();
             //var_dump($params);
             $pedidoProducto = new PedidoProducto();
-            $pedidoProducto->id_pedido = $params["mesa"];
+            $pedidoProducto->id_pedido = $params["idPedido"];
             $pedidoProducto->id_producto = $params["producto"];
             $pedidoProducto->cantidad = $params["cantidad"];
             $alta = PedidoProducto::Alta($pedidoProducto);
@@ -20,7 +20,7 @@ class PedidoProductoAPI
             switch($alta)
             {
                 case 0:
-                    $respuesta = "No existe la mesa o no está ocupada. Pruebe a grabarla o a abrir pedido.";
+                    $respuesta = "No se ha grabado el pedido.";
                     break;
                 case 1:
                     $respuesta = "Pedido grabado con éxito :).";
@@ -39,6 +39,73 @@ class PedidoProductoAPI
             return $newResponse;
         }
     }  
+
+    public function Baja($request, $response, $args)
+    {
+        try
+        {
+            //var_dump($args);
+            $idDelPedido = $args["id"];
+            $modificacion = PedidoProducto::Baja($idDelPedido);
+            switch($modificacion)
+            {
+                case 0:
+                    $respuesta = "No existe este pedido.";
+                    break;
+                case 1:
+                    $respuesta = "Pedido borrado con éxito.";
+                    break;
+                default:
+                    $respuesta = "Nunca llega a la modificacion";
+            }    
+            $payload = json_encode($respuesta);
+            $response->getBody()->write($payload);
+            $newResponse = $response->withHeader('Content-Type', 'application/json');
+        }
+        catch(Throwable $mensaje)
+        {
+            printf("Error al dar de baja: <br> $mensaje .<br>");
+        }
+        finally
+        {
+            return $newResponse;
+        }
+    }
+
+    public function Modificacion($request, $response, $args)
+    {
+        try
+        {
+            $params = $request->getParsedBody();
+            $pedidoProducto = new PedidoProducto();
+            $pedidoProducto->id = $params["idDelPedido"];
+            $pedidoProducto->id_producto = $params["idProducto"];
+            $pedidoProducto->id_cantidad = $params["cantidad"];
+            $modificacion = PedidoProducto::Modificacion($pedidoProducto);
+            switch($modificacion)
+            {
+                case 0:
+                    $respuesta = "Error generando el pedido del producto.";
+                    break;
+                case 1:
+                    $respuesta = "Pedido de producto modificado.";
+                    break;
+                default:
+                    $respuesta = "Nunca llega a la modificacion";
+            }    
+            $payload = json_encode($respuesta);
+            $response->getBody()->write($payload);
+            $newResponse = $response->withHeader('Content-Type', 'application/json');
+        }
+        catch(Throwable $mensaje)
+        {
+            printf("Error al modifcar: <br> $mensaje .<br>");
+        }
+        finally
+        {
+            return $newResponse;
+        }
+    }
 
 
     public function ListarPedidosBarra($request, $response, $args)

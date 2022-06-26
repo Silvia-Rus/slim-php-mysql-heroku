@@ -21,7 +21,7 @@ include_once './api/PedidoProductoAPI.php';
 include_once './api/EncuestaAPI.php';
 include_once './api/SectorAPI.php';
 include_once './api/TipoUsuarioAPI.php';
-
+include_once './api/ReportesAPI.php';
 
 
 include_once './db/AccesoDatos.php';
@@ -83,13 +83,23 @@ $app->post('/pedido/alta[/]', \PedidoAPI::class . ':Alta')
 ->add(\UsuarioMW::class. ':ValidarMozo')
 ->add(\UsuarioMW::class. ':ValidarToken');
 $app->delete('/pedido/baja/{id}[/]', \PedidoAPI::class . ':Baja');
-
-$app->post('/pedido/nuevopedido[/]', \PedidoAPI::class . ':Alta');
-
+$app->post('/pedido/modificacion[/]', \PedidoAPI::class . ':Modificacion');
 
 
+//PedidoProducto
+$app->post('/pedidoproducto/alta[/]', \PedidoProductoAPI::class . ':Alta'); 
+$app->delete('/pedidoproducto/baja/{id}[/]', \PedidoProductoAPI::class . ':Baja'); 
+$app->post('/pedidoproducto/modificacion[/]', \PedidoProductoAPI::class . ':Modificacion'); 
 
-$app->post('/pedido/aniadirProducto[/]', \PedidoProductoAPI::class . ':Alta'); 
+//Reportes
+//solo socios
+$app->get('/reportes/demorapedidoscerrados[/]', \ReportesAPI::class . ':DemoraPedidosCerrados');  
+$app->get('/reportes/estadomesas[/]', \ReportesAPI::class . ':EstadoMesas');  
+$app->get('/reportes/mejorescomentarios[/]', \ReportesAPI::class . ':MejoresComentarios');  
+$app->get('/reportes/mesamasusada[/]', \ReportesAPI::class . ':MesaMasUsada');  
+
+
+
 $app->post('/pedido/comiendo[/]', \PedidoAPI::class . ':PasarAComiendo'); 
 $app->post('/pedido/pagando[/]', \PedidoAPI::class . ':PasarAPagando'); 
 $app->post('/pedido/cerrar[/]', \PedidoAPI::class . ':CerrarPedido'); 

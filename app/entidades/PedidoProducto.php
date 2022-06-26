@@ -19,30 +19,42 @@ class PedidoProducto
 
     public static function Alta($pedidoProducto)
     {
-        $id_pedidoAux = Pedido::idPedidoAPartirDeMesa($pedidoProducto->id_pedido); 
         $retorno = 0;
-        if($id_pedidoAux != null)
+        
+        $pedidoAux = AccesoDatos::retornarObjetoActivo($pedidoProducto->id_pedido, 'pedido','Pedido');
+        $productoAux = AccesoDatos::retornarObjetoActivo($pedidoProducto->id_producto, 'producto','Producto');
+        if(sizeof($pedidoAux) > 0 && sizeof($productoAux) > 0)
         {
-            $pedidoProducto->id_pedido = $id_pedidoAux;
             $pedidoProducto->crearRegistro();
             $retorno = 1;
         }
         return $retorno;
     }
 
-    public static function Baja($pedidoProducto)
+    public static function Baja($id)
     {
-        return AccesoDatos::borrarRegistro($pedidoProducto->id, 'pedido');
+        $retorno = 0;
+        $pedidoProductoAux = AccesoDatos::retornarObjetoActivo($id, 'pedido_producto', 'PedidoProducto');
+
+        if($pedidoProductoAux != null)
+        {
+            AccesoDatos::borrarRegistro($id, 'pedido_producto');
+            $retorno = 1;
+        }         
+        return $retorno;
     }
 
     public static function Modificacion($pedidoProducto)
     {
-        $id_pedidoAux = Pedido::idPedidoAPartirDeMesa($pedidoProducto->id_pedido); 
+        //var_dump($pedidoProducto);
         $retorno = 0;
-        if($id_pedidoAux != null)
+        $pedidoAux = AccesoDatos::retornarObjetoActivo($pedidoProducto->id, 'pedido_producto', 'Pedido');
+        $productoAux = AccesoDatos::retornarObjetoActivo($pedidoProducto->id_producto, 'producto', 'Producto');
+        if(sizeof($pedidoAux) > 0 && sizeof($productoAux) > 0)
         {
-            $pedidoProducto->id_pedido = $id_pedidoAux;
-            PedidoProducto::modificarRegistro($pedidoProducto);
+            $pedidoAux[0]->cantidad = $pedidoProducto->id_cantidad;
+            $pedidoAux[0]->id_producto = $pedidoProducto->id_producto;
+            PedidoProducto::modificarRegistro($pedidoAux[0]);
             $retorno = 1;
         }
         return $retorno;
@@ -82,10 +94,11 @@ class PedidoProducto
         try
         {
             $objAccesoDatos = AccesoDatos::obtenerInstancia();
-            $consulta = $objAccesoDatos->prepararConsulta("INSERT INTO  pedido_producto (id_pedido, id_producto, cantidad, estado, created_at, updated_at, activo) 
-                                                                  VALUES (:id_pedido, :id_producto, :cantidad, :estado, :created_at, :updated_at, :activo)");
+            $consulta = $objAccesoDatos->prepararConsulta("INSERT INTO  pedido_producto (id_pedido, id_producto, id_usuario, cantidad, estado, created_at, updated_at, activo) 
+                                                                  VALUES (:id_pedido, :id_producto, :id_usuario, :cantidad, :estado, :created_at, :updated_at, :activo)");
             $consulta->bindValue(':id_pedido', $this->id_pedido, PDO::PARAM_STR);
-            $consulta->bindValue(':id_producto', $this->id_producto, PDO::PARAM_STR); 
+            $consulta->bindValue(':id_producto', $this->id_producto, PDO::PARAM_STR);
+            $consulta->bindValue(':id_usuario', '-1', PDO::PARAM_STR); 
             $consulta->bindValue(':cantidad', $this->cantidad, PDO::PARAM_STR); 
             $consulta->bindValue(':estado', '0', PDO::PARAM_STR); 
             $consulta->bindValue(':activo', '1', PDO::PARAM_STR);

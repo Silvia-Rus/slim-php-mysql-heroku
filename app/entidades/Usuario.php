@@ -4,6 +4,9 @@ include_once("db/AccesoDatos.php");
 include_once("entidades/Log.php");
 //require_once '/interfaces/IEntidad.php';
 
+date_default_timezone_set('America/Buenos_Aires');
+
+
 class Usuario 
 //implements IEntidad
 {

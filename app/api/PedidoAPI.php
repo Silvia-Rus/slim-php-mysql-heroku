@@ -16,6 +16,7 @@ class PedidoAPI
             $pedido = new Pedido();
             $pedido->id_mesa= $params["mesa"];
             $pedido->id_cliente =  Cliente::Alta($cliente);
+            $pedido->id_usuario= $params["id_usuario"];
             $pedido->fecha_prevista = $params["estara_en"];
             $alta = Pedido::Alta($pedido);
             switch($alta)
@@ -25,7 +26,10 @@ class PedidoAPI
                     break;
                 case '0':
                     $respuesta = 'No se generó el pedido pues la mesa está ocupada';
-                    break;    
+                    break;   
+                case '2':
+                    $respuesta = 'Usuario inválido.';
+                    break;  
             }
             $payload = json_encode($respuesta);
             $response->getBody()->write($payload);
@@ -67,6 +71,47 @@ class PedidoAPI
         catch(Throwable $mensaje)
         {
             printf("Error al dar de baja: <br> $mensaje .<br>");
+        }
+        finally
+        {
+            return $newResponse;
+        }
+    }
+
+    public function Modificacion($request, $response, $args)
+    {
+        try
+        {
+            $params = $request->getParsedBody();
+            $pedido = new Pedido();
+            $pedido->id = $params["idDelPedido"];
+            $pedido->id_mesa = $params["nuevaMesa"];
+            $pedido->id_usuario = $params["nuevoMozo"];
+            $modificacion = Pedido::Modificacion($pedido);
+            switch($modificacion)
+            {
+                case 0:
+                    $respuesta = "Este ID no corresponde a ningún pedido.";
+                    break;
+                case 1:
+                    $respuesta = "Mesa no disponible.";
+                    break;
+                case 2:
+                    $respuesta = "Pedido modificado con éxito.";
+                    break;
+                case 3:
+                    $respuesta = "No existe el empleado asignado.";
+                    break;
+                default:
+                    $respuesta = "Nunca llega a la modificacion";
+            }    
+            $payload = json_encode($respuesta);
+            $response->getBody()->write($payload);
+            $newResponse = $response->withHeader('Content-Type', 'application/json');
+        }
+        catch(Throwable $mensaje)
+        {
+            printf("Error al modifcar: <br> $mensaje .<br>");
         }
         finally
         {

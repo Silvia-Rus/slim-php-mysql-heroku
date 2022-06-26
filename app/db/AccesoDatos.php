@@ -59,6 +59,33 @@ class AccesoDatos
         }    
     }
 
+    public static function borrarPorCondicion($valor, $campo, $tabla)
+    {
+        $retorno = false;
+        try
+        {   
+            if($campo != 'id')
+            {
+                $conexion = AccesoDatos::obtenerInstancia();
+                $consulta = $conexion->prepararConsulta("UPDATE $tabla 
+                                                         SET activo = '0', updated_at = :updated_at 
+                                                         WHERE $valor = $campo");
+                $fecha = new DateTime(date("d-m-Y"));
+                $consulta->bindValue(':updated_at', date_format($fecha, 'Y-m-d H:i:s'));
+                $consulta->execute();
+                $retorno = true;
+            }
+        }
+        catch(Throwable $mensaje)
+        {
+            printf("Error al borrar en la base de datos: <br> $mensaje .<br>");
+        }
+        finally
+        {
+            return $retorno;
+        }
+    }
+
     public static function modificarCampo($id, $tabla, $campo, $valor)
     {
         $retorno = false;
@@ -78,7 +105,7 @@ class AccesoDatos
         }
         catch(Throwable $mensaje)
         {
-            printf("Error al borrar en la base de datos: <br> $mensaje .<br>");
+            printf("Error al modificar en la base de datos: <br> $mensaje .<br>");
         }
         finally
         {

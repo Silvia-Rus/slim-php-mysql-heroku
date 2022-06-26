@@ -1,6 +1,8 @@
 <?php
 
 //require_once '/interfaces/IEntidad.php';
+date_default_timezone_set('America/Buenos_Aires');
+
 
 class Cliente //implements IEntidad
 {
