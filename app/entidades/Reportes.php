@@ -3,6 +3,19 @@ include_once("db/AccesoDatos.php");
 
 class Reportes
 {
+    
+    public static function PedidoProductoListoParaServir()
+    {
+        $sql = "SELECT p.id_mesa as mesa, 
+                       pr.nombre as producto, 
+                       pp.cantidad as cantidad
+                FROM producto pr 
+                    right JOIN pedido_producto pp ON pp.id_producto = pr.id 
+                    left JOIN pedido p ON pp.id_pedido = p.id 
+                WHERE pp.estado = 2 AND pp.activo = 1;";
+        
+        return AccesoDatos::ObtenerConsulta($sql, null);
+    }
     // 4 - El cliente
     public static function DemoraPedidoMesa($mesa, $pedido)
     {
@@ -89,10 +102,5 @@ class Reportes
         
         return AccesoDatos::ObtenerConsulta($sql, null);
     }
-
-
 }
-
-
-
 ?>

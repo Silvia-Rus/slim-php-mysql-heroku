@@ -1,9 +1,8 @@
 <?php
-
-//require_once '/interfaces/IEntidad.php';
+require_once '/interfaces/IEntidad.php';
 date_default_timezone_set('America/Buenos_Aires');
 
-class Sector //implements IEntidad
+class Sector implements IEntidad
 {
     public $id;
     public $nombre;
@@ -102,7 +101,5 @@ class Sector //implements IEntidad
             printf("Error al conectar en la base de datos: <br> $mensaje .<br>");
         }
     }
-
 }
-
 ?>

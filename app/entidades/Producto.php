@@ -1,10 +1,8 @@
 <?php
 include_once("db/AccesoDatos.php");
-//include_once("entidades/Sector.php");
-//require_once '/interfaces/IEntidad.php';
+require_once '/interfaces/IEntidad.php';
 
-class Producto 
-//implements IEntidad
+class Producto implements IEntidad
 {
     public $id;
     public $id_sector;
@@ -16,9 +14,7 @@ class Producto
     public static function Alta($producto)
     {
         $retorno = -1;
-        //var_dump($producto);
         $sectorAux = AccesoDatos::retornarObjetoActivoPorCampo($producto->id_sector, "nombre", "sector", "Sector");
-        //var_dump($sectorAux);
         if($sectorAux == null)
         {
             $retorno = 0;
@@ -31,7 +27,6 @@ class Producto
             {               
                 $productoAux[0]->id_sector = $sectorAux[0]->id;
                 $productoAux[0]->precio = $producto->precio;
-                // var_dump($productoAux);
                 Producto::modificarRegistro($productoAux[0]);
                 $retorno = 1;
             }

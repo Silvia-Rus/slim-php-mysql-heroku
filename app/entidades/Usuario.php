@@ -1,14 +1,11 @@
 <?php
 include_once("db/AccesoDatos.php");
-//include_once("entidades/TipoUsuario.php");
 include_once("entidades/Log.php");
-//require_once '/interfaces/IEntidad.php';
+require_once '/interfaces/IEntidad.php';
 
 date_default_timezone_set('America/Buenos_Aires');
 
-
-class Usuario 
-//implements IEntidad
+class Usuario implements IEntidad
 {
     public $id;
     public $dni;
@@ -21,9 +18,7 @@ class Usuario
     public static function Alta($usuario)
     {
         $retorno = -1;
-        //comprobar si existe el tipo
         $tipoAux= AccesoDatos::retornarObjetoActivoPorCampo($usuario->tipo, "nombre", "tipo_usuario", "TipoUsuario");
-        //comprobar si existe el usuario
         $usuarioAux =  AccesoDatos::retornarObjetoPorCampo($usuario->dni, "dni", "usuario", "Usuario");
 
         if($tipoAux== null)
@@ -123,8 +118,6 @@ class Usuario
 
         return $retorno;
     }
-
-
     //Manejo BD
     public function crearRegistro()
     {

@@ -112,7 +112,8 @@ class PedidoProductoAPI
     {
         try
         {
-            $lista = AccesoDatos::ObtenerPedidosPorSector('1');
+            $id = AccesoDatos::retornarObjetoActivoPorCampo('barra', 'nombre', 'sector', 'Sector');
+            $lista = AccesoDatos::ObtenerPedidosPorSector($id[0]->id);
             $payload = json_encode(array("PedidosActivosBarra" => $lista));
             $response->getBody()->write($payload);
             $newResponse = $response->withHeader('Content-Type', 'application/json');
@@ -131,8 +132,8 @@ class PedidoProductoAPI
     {
         try
         {
-            $lista = AccesoDatos::ObtenerPedidosPorSector('2');
-            var_dump($lista);
+            $id = AccesoDatos::retornarObjetoActivoPorCampo('choperas', 'nombre', 'sector', 'Sector');
+            $lista = AccesoDatos::ObtenerPedidosPorSector($id[0]->id);
             $payload = json_encode(array("PedidosActivosChoperas" => $lista));
             $response->getBody()->write($payload);
             $newResponse = $response->withHeader('Content-Type', 'application/json');
@@ -151,7 +152,8 @@ class PedidoProductoAPI
     {
         try
         {
-            $lista = AccesoDatos::ObtenerPedidosPorSector('3');
+            $id = AccesoDatos::retornarObjetoActivoPorCampo('cocina', 'nombre', 'sector', 'Sector');
+            $lista = AccesoDatos::ObtenerPedidosPorSector($id[0]->id);
             $payload = json_encode(array("PedidosActivosCocina" => $lista));
             $response->getBody()->write($payload);
             $newResponse = $response->withHeader('Content-Type', 'application/json');
@@ -170,30 +172,9 @@ class PedidoProductoAPI
     {
         try
         {
-            $lista = AccesoDatos::ObtenerPedidosPorSector('4');
+            $id = AccesoDatos::retornarObjetoActivoPorCampo('candybar', 'nombre', 'sector', 'Sector');
+            $lista = AccesoDatos::ObtenerPedidosPorSector($id[0]->id);
             $payload = json_encode(array("PedidosActivosCandybar" => $lista));
-            $response->getBody()->write($payload);
-            $newResponse = $response->withHeader('Content-Type', 'application/json');
-        }
-        catch(Throwable $mensaje)
-        {
-            printf("Error al listar: <br> $mensaje .<br>");
-        }
-        finally
-        {
-            return $newResponse;
-        }    
-    }
-
-    public function AsignarFechaPrevista($request, $response, $args)
-    {
-        try
-        {
-            $params = $request->getParsedBody();
-            $idPedidoProducto = $params["idPedido"];
-            $tiempo = $params["tiempo"];
-            PedidoProducto::AsignarFechaPrevista($idPedidoProducto, $tiempo);
-            $payload = json_encode("Fecha prevista asignada con éxito");
             $response->getBody()->write($payload);
             $newResponse = $response->withHeader('Content-Type', 'application/json');
         }
@@ -213,7 +194,10 @@ class PedidoProductoAPI
         {
             $params = $request->getParsedBody();
             $idPedidoProducto = $params["id"];
-            PedidoProducto::CambiarEstado($idPedidoProducto, '1');
+            $idUsuario = $params["usuario"];
+            $tardanzaEnMinutos = $params["tardanza"];
+
+            PedidoProducto::CambiarEstado('1', $idPedidoProducto, $idUsuario, $tardanzaEnMinutos);
             $payload = json_encode("Pedido en preparación.");
             $response->getBody()->write($payload);
             $newResponse = $response->withHeader('Content-Type', 'application/json');
@@ -234,7 +218,7 @@ class PedidoProductoAPI
         {
             $params = $request->getParsedBody();
             $idPedidoProducto = $params["id"];
-            PedidoProducto::CambiarEstado($idPedidoProducto, '2');
+            PedidoProducto::CambiarEstado('2', $idPedidoProducto);
             $payload = json_encode("Pedido listo para servir.");
             $response->getBody()->write($payload);
             $newResponse = $response->withHeader('Content-Type', 'application/json');

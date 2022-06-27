@@ -1,9 +1,8 @@
 <?php
-//require_once './interfaces/IEntidad.php';
+require_once './interfaces/IEntidad.php';
 date_default_timezone_set('America/Buenos_Aires');
 
-class TipoUsuario 
-//implements IEntidad
+class TipoUsuario implements IEntidad
 {
     public $id;
     public $nombre;
@@ -104,7 +103,5 @@ class TipoUsuario
             printf("Error al conectar en la base de datos: <br> $mensaje .<br>");
         }
     }
-
 }
-
 ?>

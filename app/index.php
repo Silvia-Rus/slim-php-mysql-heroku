@@ -113,11 +113,36 @@ $app->group('/pedido', function (RouteCollectorProxy $group)
   $group->post('/alta[/]', \PedidoAPI::class . ':Alta');
   $group->delete('/baja/{id}[/]', \PedidoAPI::class . ':Baja');
   $group->post('/modificacion[/]', \PedidoAPI::class . ':Modificacion');
+  //Subir Foto
   $group->post('/subirfoto[/]', \PedidoAPI::class . ':SubirFoto');
+  //Manejo del pedido
+  $group->get('/paraservir[/]', \ReportesAPI::class . ':PedidoProductoListoParaServir'); 
+  $group->post('/comiendo[/]', \PedidoAPI::class . ':PasarAComiendo'); 
+  $group->post('/pagando[/]', \PedidoAPI::class . ':PasarAPagando'); 
 })
-  //->add(\UsuarioMW::class. ':ValidarMozo')
-  //->add(\UsuarioMW::class. ':ValidarToken')
-  ;
+  ->add(\UsuarioMW::class. ':ValidarMozo')
+  ->add(\UsuarioMW::class. ':ValidarToken');
+
+$app->get('/pedido/lista[/]', \PedidoAPI::class . ':Listar');
+
+//Cerrar pedido
+$app->post('/pedido/cerrar[/]', \PedidoAPI::class . ':CerrarPedido') 
+  ->add(\UsuarioMW::class. ':ValidarSocio')
+  ->add(\UsuarioMW::class. ':ValidarToken');
+
+//Listado de pedidos activos
+$app->get('/pedido/listaBarra[/]', \PedidoProductoAPI::class . ':ListarPedidosBarra')
+  ->add(\UsuarioMW::class. ':ValidarBartender')
+  ->add(\UsuarioMW::class. ':ValidarToken');  
+$app->get('/pedido/listaChoperas[/]', \PedidoProductoAPI::class . ':ListarPedidosChoperas')
+  ->add(\UsuarioMW::class. ':ValidarCervecero')
+  ->add(\UsuarioMW::class. ':ValidarToken');;  
+$app->get('/pedido/listaCocina[/]', \PedidoProductoAPI::class . ':ListarPedidosCocina')
+  ->add(\UsuarioMW::class. ':ValidarCocinero')
+  ->add(\UsuarioMW::class. ':ValidarToken');  
+$app->get('/pedido/listaCandybar[/]', \PedidoProductoAPI::class . ':ListarPedidosCandybar') 
+  ->add(\UsuarioMW::class. ':ValidarRepostero')
+  ->add(\UsuarioMW::class. ':ValidarToken');
 
 //PedidoProducto
 $app->group('/pedidoproducto', function (RouteCollectorProxy $group) 
@@ -130,23 +155,10 @@ $app->group('/pedidoproducto', function (RouteCollectorProxy $group)
   ->add(\UsuarioMW::class. ':ValidarMozo')
   ->add(\UsuarioMW::class. ':ValidarToken');
 
-$app->post('/pedido/comiendo[/]', \PedidoAPI::class . ':PasarAComiendo'); 
-$app->post('/pedido/pagando[/]', \PedidoAPI::class . ':PasarAPagando'); 
-$app->post('/pedido/cerrar[/]', \PedidoAPI::class . ':CerrarPedido'); 
-$app->post('/pedido/asignarfecha[/]', \PedidoProductoAPI::class . ':AsignarFechaPrevista'); 
-$app->post('/pedido/enpreparacion[/]', \PedidoProductoAPI::class . ':PedidoEnPreparacion'); 
+//Manejo estados Pedido Producto
+$app->post('/pedido/enpreparacion[/]', \PedidoProductoAPI::class . ':PedidoEnPreparacion');
 $app->post('/pedido/listo[/]', \PedidoProductoAPI::class . ':PedidoListo'); 
 
 $app->post('/encuesta/nuevaEncuesta[/]', \EncuestaAPI::class . ':Alta'); 
-
-
-
-$app->get('/pedido/lista[/]', \PedidoAPI::class . ':Listar');  
-
-//una para cada tipo
-$app->get('/pedido/listaBarra[/]', \PedidoProductoAPI::class . ':ListarPedidosBarra');  
-$app->get('/pedido/listaChoperas[/]', \PedidoProductoAPI::class . ':ListarPedidosChoperas');  
-$app->get('/pedido/listaCocina[/]', \PedidoProductoAPI::class . ':ListarPedidosCocina');  
-$app->get('/pedido/listaCandybar[/]', \PedidoProductoAPI::class . ':ListarPedidosCandybar');  
 
 $app->run();

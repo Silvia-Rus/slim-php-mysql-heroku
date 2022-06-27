@@ -1,11 +1,9 @@
 <?php
 include_once("db/AccesoDatos.php");
-//require_once '/interfaces/IEntidad.php';
+require_once '/interfaces/IEntidad.php';
 date_default_timezone_set('America/Buenos_Aires');
 
-
-class Pedido 
-//implements IEntidad
+class Pedido implements IEntidad
 {
     public $id;
     public $id_mesa;
@@ -22,11 +20,8 @@ class Pedido
     
     public static function Alta($pedido)
     {
-        $retorno = 0; //No se generó el pedido pues la mesa está ocupada
-        //var_dump($pedido);
-
+        $retorno = 0; 
         $idMesaAux = AccesoDatos::retornarObjetoActivoPorCampo($pedido->id_mesa, 'id_mesa', 'pedido', 'Pedido');
-        //var_dump($idMesaAux);
         if(sizeof($idMesaAux) == 0)
         {
             $idUsuarioAux = AccesoDatos::retornarObjetoActivoPorCampo($pedido->id_usuario, 'id', 'usuario', 'Usuario');
@@ -79,18 +74,26 @@ class Pedido
         return $retorno;
     }
 
-    public static function CambiarEstado($mesa, $idEstado)
+    public static function CambiarEstado($idPedido, $idEstado)
     {
-        /*$idPedido = Pedido::idPedidoAPartirDeMesa($mesa);
-        $pedido = AccesoDatos::retornarObjeto($idPedido, 'pedido', 'Pedido');
-        $pedido->estado = $idEstado;
-        if($idEstado == 4)
+        $pedido = AccesoDatos::retornarObjetoActivo($idPedido, 'pedido', 'Pedido');
+        $pedido[0]->estado = $idEstado; //comiendo
+        $retorno = 'Mesa pasada a comiendo.';
+        switch($idEstado)
         {
-            $pedido->precio_final = Pedido::CalcularPrecio($mesa);//calcular precio
-            $pedido->fecha_fin = new DateTime(date("d-m-Y H:i:s"));
-            $pedido->fecha_fin =  $pedido->fecha_fin->format("Y-m-d H:i:s");  
+            case 3: 
+                $pedido[0]->precio_final = Pedido::CalcularPrecio($pedido[0]->id_mesa);//calcular precio           
+                $retorno = $pedido[0]->precio_final;
+                break;
+            case 4: 
+                $fecha = new DateTime(date("d-m-Y H:i:s"));
+                $pedido[0]->fecha_fin = $fecha->format("Y-m-d H:i:s");
+                $retorno = 'Mesa cerrada';
+                break;
+
         }
-        Pedido::modificarRegistro($pedido);*/
+        Pedido::modificarRegistro($pedido[0]);
+        return $retorno;
     }
 
     public static function CalcularPrecio($mesa)
@@ -104,14 +107,10 @@ class Pedido
                     LEFT JOIN producto pr ON pr.id = pp.id_producto
                 WHERE p.id_mesa = $mesa AND p.estado = 3 AND pp.estado = 2;";       
         $lista = AccesoDatos::ObtenerConsulta($sql);
-        //var_dump($lista);
 
         foreach($lista as $item)
         {
-            var_dump($item);
-            //printf("llega aquí?");
-            $precioItem = $item["cantidad"] * $item["precio"];
-            //var_dump($precioItem);
+            $precioItem = $item->cantidad * $item->precio;
             $precio = $precio + $precioItem;
         }
         return $precio;
@@ -222,5 +221,4 @@ class Pedido
         }
     }
 }
-
 ?>

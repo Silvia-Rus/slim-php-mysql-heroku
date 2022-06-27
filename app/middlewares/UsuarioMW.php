@@ -87,6 +87,127 @@ class UsuarioMW
             return $response->withHeader('Content-Type', 'application/json');;
         }
     }
+
+    public function ValidarCervecero($request, $handler)
+    {
+        try 
+        {
+            $tipo = AccesoDatos::retornarObjetoActivoPorCampo('cervecero', 'nombre', 'tipo_usuario', 'TipoUsuario');
+            $header = $request->getHeaderLine('Authorization');
+            if(!empty($header))
+            {
+                $token = trim(explode("Bearer", $header)[1]);
+                $data = Token::verifyToken($token);
+                if($data->tipo == $tipo[0]->id)
+                {
+                    return $handler->handle($request);
+                }
+                throw new Exception("Usuario no autorizado");
+            }
+            else
+            {                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
+                throw new Exception("Token vacío");
+            }
+        } 
+        catch (\Throwable $th) 
+        {
+            $response = new Response();
+            $payload = json_encode(array("mensaje" => "ERROR, ".$th->getMessage()));
+            $response->getBody()->write($payload);
+            return $response->withHeader('Content-Type', 'application/json');;
+        }
+    }
+
+    public function ValidarBartender($request, $handler)
+    {
+        try 
+        {
+            $tipo = AccesoDatos::retornarObjetoActivoPorCampo('bartender', 'nombre', 'tipo_usuario', 'TipoUsuario');
+            $header = $request->getHeaderLine('Authorization');
+            if(!empty($header))
+            {
+                $token = trim(explode("Bearer", $header)[1]);
+                $data = Token::verifyToken($token);
+                if($data->tipo == $tipo[0]->id)
+                {
+                    return $handler->handle($request);
+                }
+                throw new Exception("Usuario no autorizado");
+            }
+            else
+            {                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
+                throw new Exception("Token vacío");
+            }
+        } 
+        catch (\Throwable $th) 
+        {
+            $response = new Response();
+            $payload = json_encode(array("mensaje" => "ERROR, ".$th->getMessage()));
+            $response->getBody()->write($payload);
+            return $response->withHeader('Content-Type', 'application/json');;
+        }
+    }
+
+    public function ValidarCocinero($request, $handler)
+    {
+        try 
+        {
+            $tipo = AccesoDatos::retornarObjetoActivoPorCampo('cocinero', 'nombre', 'tipo_usuario', 'TipoUsuario');
+            $header = $request->getHeaderLine('Authorization');
+            if(!empty($header))
+            {
+                $token = trim(explode("Bearer", $header)[1]);
+                $data = Token::verifyToken($token);
+                if($data->tipo == $tipo[0]->id)
+                {
+                    return $handler->handle($request);
+                }
+                throw new Exception("Usuario no autorizado");
+            }
+            else
+            {                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
+                throw new Exception("Token vacío");
+            }
+        } 
+        catch (\Throwable $th) 
+        {
+            $response = new Response();
+            $payload = json_encode(array("mensaje" => "ERROR, ".$th->getMessage()));
+            $response->getBody()->write($payload);
+            return $response->withHeader('Content-Type', 'application/json');;
+        }
+    }
+
+    public function ValidarRepostero($request, $handler)
+    {
+        try 
+        {
+            $tipo = AccesoDatos::retornarObjetoActivoPorCampo('repostero', 'nombre', 'tipo_usuario', 'TipoUsuario');
+            $header = $request->getHeaderLine('Authorization');
+            if(!empty($header))
+            {
+                $token = trim(explode("Bearer", $header)[1]);
+                $data = Token::verifyToken($token);
+                if($data->tipo == $tipo[0]->id)
+                {
+                    return $handler->handle($request);
+                }
+                throw new Exception("Usuario no autorizado");
+            }
+            else
+            {                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
+                throw new Exception("Token vacío");
+            }
+        } 
+        catch (\Throwable $th) 
+        {
+            $response = new Response();
+            $payload = json_encode(array("mensaje" => "ERROR, ".$th->getMessage()));
+            $response->getBody()->write($payload);
+            return $response->withHeader('Content-Type', 'application/json');;
+        }
+    }
+ 
 }
 ?>
 

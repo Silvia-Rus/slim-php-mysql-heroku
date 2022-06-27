@@ -1,12 +1,11 @@
 <?php
 include_once("db/AccesoDatos.php");
 include_once("importexport/CSV.php");
-//require_once '/interfaces/IEntidad.php';
+require_once '/interfaces/IEntidad.php';
 date_default_timezone_set('America/Buenos_Aires');
 
 
-class Mesa 
-//implements IEntidad
+class Mesa implements IEntidad
 {
     public $id;
     public $nombre;
@@ -84,7 +83,6 @@ class Mesa
         return $retorno;
     }
        
-
     public static function CargarCSV($archivo)
     {
         $array = CSV::LeerCsv($archivo);

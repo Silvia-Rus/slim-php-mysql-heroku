@@ -1,10 +1,9 @@
 <?php
 include_once("db/AccesoDatos.php");
-//require_once '/interfaces/IEntidad.php';
+require_once '/interfaces/IEntidad.php';
 date_default_timezone_set('America/Buenos_Aires');
 
-class PedidoProducto 
-//implements IEntidad
+class PedidoProducto implements IEntidad
 {
     public $id;
     public $id_pedido;
@@ -60,32 +59,41 @@ class PedidoProducto
         return $retorno;
     }
 
-    public static function AsignarFechaPrevista($idPedidoProducto, $tardanzaEnMinutos)
-    {       
-        $pedidoProducto = AccesoDatos::retornarObjeto($idPedidoProducto, 'pedido_producto', 'PedidoProducto');
+    public static function CambiarAEnPreparacion($pedidoProducto, $tardanzaEnMinutos)
+    {
+        //var_dump($pedidoProducto);
+        $pedidoProducto->estado = 1;
         $fecha = new DateTime(date("d-m-Y H:i:s"));
         $pedidoProducto->fecha_prevista = $fecha->modify('+'.$tardanzaEnMinutos.' minutes');
-        PedidoProducto::modificarRegistro($pedidoProducto);
+        $pedidoProducto->fecha_prevista = $pedidoProducto->fecha_prevista->format("Y-m-d H:i:s");
+
+        return $pedidoProducto;
     }
 
-    public static function CambiarEstado($idPedidoProducto, $idEstado)
+    public static function CambiarAParaServir($pedidoProducto)
     {
-        $pedidoProducto = AccesoDatos::retornarObjeto($idPedidoProducto, 'pedido_producto', 'PedidoProducto');
-        $pedidoProducto->estado = $idEstado;
-        if($pedidoProducto->fecha_prevista == null)
+     
+        $pedidoProducto->estado = 2;
+        $pedidoProducto->fecha_fin = new DateTime(date("d-m-Y H:i:s"));
+        $pedidoProducto->fecha_fin = $pedidoProducto->fecha_fin->format("Y-m-d H:i:s");
+        return $pedidoProducto;
+    }
+
+    public static function CambiarEstado($idEstado, $idPedidoProducto, $idUsuario = null, $tardanzaEnMinutos = null)
+    {
+        $pedidoProducto = AccesoDatos::retornarObjetoActivoPorCampo($idPedidoProducto, 'id', 'pedido_producto', 'PedidoProducto');
+
+        switch ($idEstado)
         {
-            printf("Asigne primero una fecha prevista.");
+            case 1:
+                $pedidoProducto[0]->id_usuario = $idUsuario;
+                $pedidoProductoAux = PedidoProducto::CambiarAEnPreparacion($pedidoProducto[0], $tardanzaEnMinutos);
+                break;
+            case 2:
+                $pedidoProductoAux = PedidoProducto::CambiarAParaServir($pedidoProducto[0], $tardanzaEnMinutos);
+                break;
         }
-        else
-        {
-            if($idEstado == 2)
-            {
-                $pedidoProducto->fecha_fin = new DateTime(date("d-m-Y H:i:s"));
-                $pedidoProducto->fecha_fin = $pedidoProducto->fecha_fin->format("Y-m-d H:i:s");   
-            }
-            $pedidoProducto->estado = $idEstado;
-            PedidoProducto::modificarRegistro($pedidoProducto);
-        }
+        PedidoProducto::modificarRegistro($pedidoProductoAux);
     }
 
     public function crearRegistro() 
@@ -125,7 +133,8 @@ class PedidoProducto
             $objAccesoDato = AccesoDatos::obtenerInstancia();
             $consulta = $objAccesoDato->prepararConsulta("UPDATE pedido_producto
                                                           SET id_pedido = :id_pedido, 
-                                                              id_producto = :id_producto, 
+                                                              id_producto = :id_producto,
+                                                              id_usuario = :id_usuario, 
                                                               cantidad = :cantidad,
                                                               estado = :estado, 
                                                               fecha_prevista = :fecha_prevista,
@@ -135,6 +144,7 @@ class PedidoProducto
                                                           WHERE id = :id");
             $consulta->bindValue(':id', $pedidoProducto->id, PDO::PARAM_STR);
             $consulta->bindValue(':id_pedido', $pedidoProducto->id_pedido, PDO::PARAM_STR);
+            $consulta->bindValue(':id_usuario', $pedidoProducto->id_usuario, PDO::PARAM_STR);
             $consulta->bindValue(':id_producto', $pedidoProducto->id_producto, PDO::PARAM_STR);
             $consulta->bindValue(':cantidad', $pedidoProducto->cantidad, PDO::PARAM_STR);
             $consulta->bindValue(':estado', $pedidoProducto->estado, PDO::PARAM_STR);

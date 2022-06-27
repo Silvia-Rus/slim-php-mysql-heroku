@@ -1,10 +1,7 @@
 <?php
-//require_once '/interfaces/IEntidad.php';
 date_default_timezone_set('America/Buenos_Aires');
 
-
 class Log 
-//implements IEntidad
 {
     public $usuario;
     public $accion;
@@ -14,12 +11,10 @@ class Log
         $this->usuario = $usuario;
         $this->accion = $accion;
     }
-
     public static function Alta($log)
     {
         return $log->crearRegistro();
     }
-
 
     public function crearRegistro()
     {
@@ -71,8 +66,5 @@ class Log
             printf("Error al conectar en la base de datos: <br> $mensaje .<br>");
         }
     }
-
 }
-
-
 ?>

@@ -169,9 +169,9 @@ class PedidoAPI
         try
         {           
             $params = $request->getParsedBody();
-            $mesa = $params["mesa"];
-            Pedido::CambiarEstado($mesa, '2');
-            $payload = json_encode("Estado cambiado con éxito.");
+            $pedido = $params["pedido"];
+            Pedido::CambiarEstado($pedido, '2');
+            $payload = json_encode("En la mesa están comiendo.");
             $response->getBody()->write($payload);
             $newResponse = $response->withHeader('Content-Type', 'application/json');
 
@@ -191,9 +191,9 @@ class PedidoAPI
         try
         {           
             $params = $request->getParsedBody();
-            $mesa = $params["mesa"];
-            Pedido::CambiarEstado($mesa, '3');
-            $payload = json_encode("Estado cambiado con éxito.");
+            $pedido = $params["pedido"];
+            $respuesta = Pedido::CambiarEstado($pedido, '3');
+            $payload = json_encode("Pagando. La cuenta es: ".$respuesta);
             $response->getBody()->write($payload);
             $newResponse = $response->withHeader('Content-Type', 'application/json');
 
@@ -213,11 +213,12 @@ class PedidoAPI
         try
         {           
             $params = $request->getParsedBody();
-            $mesa = $params["mesa"];
-            Pedido::CambiarEstado($mesa, '4');
-            $payload = json_encode("Estado cambiado con éxito.");
+            $pedido = $params["pedido"];
+            Pedido::CambiarEstado($pedido, '4');
+            $payload = json_encode("Mesa cerrada.");
             $response->getBody()->write($payload);
             $newResponse = $response->withHeader('Content-Type', 'application/json');
+
         }
         catch(Throwable $mensaje)
         {

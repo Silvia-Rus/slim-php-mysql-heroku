@@ -1,11 +1,8 @@
 <?php
 include_once("db/AccesoDatos.php");
-//require_once '/interfaces/IEntidad.php';
 date_default_timezone_set('America/Buenos_Aires');
 
-
 class Encuesta 
-//implements IEntidad
 {
     public $cliente;
     public $pedido;
@@ -15,12 +12,21 @@ class Encuesta
     public $texto;
     public $activo;
 
-
     public static function Alta($encuesta)
     {
-        $pedido = AccesoDatos::retornarObjetoActivoPorCampo($encuesta->cliente, 'id_cliente', 'pedido', 'Pedido');
-        $encuesta->pedido = $pedido[0]->id;
-        $encuesta->crearRegistro();
+        $retorno = 0;
+        $pedido = AccesoDatos::retornarObjetoActivo($encuesta->pedido, 'pedido', 'Pedido');
+        if(sizeof($pedido) != 0)
+        {
+            $pedidoEnEncuesta = AccesoDatos::retornarObjetoActivoPorCampo($pedido[0]->id, 'pedido', 'encuesta', 'Encuesta');
+            if(sizeof($pedido) != 0 && sizeof($pedidoEnEncuesta) == 0)
+            {
+                $encuesta->cliente = $pedido[0]->id_cliente;
+                $encuesta->crearRegistro();
+                $retorno = 1;
+            }
+        }
+        return $retorno;  
     }
 
     public function crearRegistro()

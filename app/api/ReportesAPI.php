@@ -3,6 +3,8 @@ include_once("Entidades/Reportes.php");
 
 class ReportesAPI
 {
+    
+    
     public function DemoraPedidoMesa($request, $response, $args)
     {  
         try
@@ -90,6 +92,25 @@ class ReportesAPI
         {
             $lista = Reportes::MesaMasUsada();
             $payload = json_encode(array("mesaMasUsada" => $lista));
+            $response->getBody()->write($payload);
+            $newResponse = $response->withHeader('Content-Type', 'application/json');
+        }
+        catch(Throwable $mensaje)
+        {
+            printf("Error al listar: <br> $mensaje .<br>");
+        }
+        finally
+        {
+            return $newResponse;
+        }    
+    }
+
+    public function PedidoProductoListoParaServir($request, $response, $args)
+    {
+        try
+        {
+            $lista = Reportes::PedidoProductoListoParaServir();
+            $payload = json_encode(array("listosParaServir" => $lista));
             $response->getBody()->write($payload);
             $newResponse = $response->withHeader('Content-Type', 'application/json');
         }
