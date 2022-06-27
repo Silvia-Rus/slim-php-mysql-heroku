@@ -139,6 +139,31 @@ class PedidoAPI
         }    
     }
 
+    public function SubirFoto($request, $response, $args)
+    {
+        try
+        {
+            $params = $request->getParsedBody();
+            $pedido = new Pedido();
+            $pedido->id = $params["id"];
+            $archivo = ($_FILES["archivo"]);
+            $pedido->foto = ($archivo["tmp_name"]);
+            $pedido->GuardarImagen();
+            //var_dump($archivo);
+            $payload = json_encode("Carga exitosa.");
+            $response->getBody()->write($payload);
+            $newResponse = $response->withHeader('Content-Type', 'application/json');
+        }
+        catch(Throwable $mensaje)
+        {
+            printf("Error al listar: <br> $mensaje .<br>");
+        }
+        finally
+        {
+            return $newResponse;
+        }    
+    }
+
     public function PasarAComiendo($request, $response, $args)
     {
         try
@@ -203,10 +228,6 @@ class PedidoAPI
             return $newResponse;
         }  
     }
-
-
 }
-
-
 
 ?>

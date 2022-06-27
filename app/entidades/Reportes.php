@@ -4,8 +4,11 @@ include_once("db/AccesoDatos.php");
 class Reportes
 {
     // 4 - El cliente
-    public static function DemoraPedidoCliente($cliente, $pedido)
+    public static function DemoraPedidoMesa($mesa, $pedido)
     {
+        $pedidoAux = str_replace($pedido[0],'1', $pedido); 
+        $mesaAux = str_replace($mesa[0],'1', $mesa); 
+
         $sql= "SELECT 
                 TIMESTAMPDIFF(minute, DATE_FORMAT(p.created_at, '%Y%m%d%H%i%s'), 
                                       DATE_FORMAT(p.fecha_prevista, '%Y%m%d%H%i%s')) 
@@ -14,7 +17,7 @@ class Reportes
                                       DATE_FORMAT(p.fecha_prevista, '%Y%m%d%H%i%s')) 
                                       as 'Quedan (en min)'
               FROM pedido p
-              WHERE p.id_cliente = $cliente AND p.id = $pedido AND p.fecha_fin is null AND activo = 1;";
+              WHERE p.id_mesa = $mesaAux AND p.id = $pedidoAux AND p.fecha_fin is null AND activo = 1;";
     
         return AccesoDatos::ObtenerConsulta($sql, null);
     }

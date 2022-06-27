@@ -12,15 +12,18 @@ class SectorAPI
             $sector = new Sector();
             $sector->nombre = $params["nombre"];
             $alta = Sector::Alta($sector);
-            if($alta > 0)
-            { 
-                $respuesta = "Sector creado con éxito;";
-            }
-            else
+            switch ($alta)
             {
-                $respuesta = "Problemas creando el sector.";
-            }
-  
+                case '0':
+                    $respuesta = "Problemas creando el sector.";
+                    break;
+                case '1':
+                    $respuesta = "Sector creado con éxito.";
+                    break;
+                case '2':
+                    $respuesta = "El sector ya existía.";
+                    break;
+            } 
             $payload = json_encode($respuesta);
             $response->getBody()->write($payload);
             $newResponse = $response->withHeader('Content-Type', 'application/json');

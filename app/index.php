@@ -40,65 +40,95 @@ $app->get('[/]', function (Request $request, Response $response) {
 
 });
 
-//Sector
-$app->post('/sector/alta[/]', \SectorAPI::class . ':Alta');
-$app->post('/sector/modificacion[/]', \SectorAPI::class . ':Modificacion');
-$app->delete('/sector/baja/{id}[/]', \SectorAPI::class . ':Baja');
-$app->get('/sector/lista[/]', \SectorAPI::class . ':Listar');  
-
-//TipoUsuario
-$app->post('/tipousuario/alta[/]', \TipoUsuarioAPI::class . ':Alta');
-$app->post('/tipousuario/modificacion[/]', \TipoUsuarioAPI::class . ':Modificacion');
-$app->delete('/tipousuario/baja/{id}[/]', \TipoUsuarioAPI::class . ':Baja');
-$app->get('/tipousuario/lista[/]', \TipoUsuarioAPI::class . ':Listar'); 
-
-//Mesas
-$app->post('/mesa/alta[/]', \MesaAPI::class . ':Alta'); 
-$app->delete('/mesa/baja/{id}[/]', \MesaAPI::class . ':Baja');
-$app->post('/mesa/modificacion[/]', \MesaAPI::class . ':Modificacion'); 
-$app->get('/mesa/lista[/]', \MesaAPI::class . ':Listar'); 
-
-$app->get('/mesa/export[/]', \MesaAPI::class . ':ExportarTabla');  
-$app->post('/mesa/import[/]', \MesaAPI::class . ':ImportarTabla');  
-
-
-//Usuarios
-$app->post('/empleados/alta[/]', \UsuarioAPI::class . ':Alta');
-$app->delete('/empleados/baja/{id}[/]', \UsuarioAPI::class . ':Baja');
-$app->post('/empleados/modificacion[/]', \UsuarioAPI::class . ':Modificacion'); 
-$app->get('/empleados/lista[/]', \UsuarioAPI::class . ':Listar');  
-
 $app->post('/empleados/login[/]', \UsuarioAPI::class . ':Login');  
 
+//Sector
+$app->group('/sector', function (RouteCollectorProxy $group) 
+{
+  //ABM
+  $group->post('/alta[/]', \SectorAPI::class . ':Alta');
+  $group->post('/modificacion[/]', \SectorAPI::class . ':Modificacion');
+  $group->delete('/baja/{id}[/]', \SectorAPI::class . ':Baja');
+  $group->get('/lista[/]', \SectorAPI::class . ':Listar');  
+});
 
-//Productos 
-$app->post('/productos/alta[/]', \ProductoAPI::class . ':Alta'); 
-$app->delete('/productos/baja/{id}[/]', \ProductoAPI::class . ':Baja');
-$app->post('/productos/modificacion[/]', \ProductoAPI::class . ':Modificacion');  
-$app->get('/productos/lista[/]', \ProductoAPI::class . ':Listar');  
+//Tipo de usuario
+$app->group('/tipousuario', function (RouteCollectorProxy $group) 
+{
+  //ABM
+  $group->post('/alta[/]', \TipoUsuarioAPI::class . ':Alta');
+  $group->post('/modificacion[/]', \TipoUsuarioAPI::class . ':Modificacion');
+  $group->delete('/baja/{id}[/]', \TipoUsuarioAPI::class . ':Baja');
+  $group->get('/lista[/]', \TipoUsuarioAPI::class . ':Listar'); 
+}); 
 
+//Mesa
+$app->group('/mesa', function (RouteCollectorProxy $group) 
+{
+  //ABM
+  $group->post('/alta[/]', \MesaAPI::class . ':Alta'); 
+  $group->delete('/baja/{id}[/]', \MesaAPI::class . ':Baja');
+  $group->post('/modificacion[/]', \MesaAPI::class . ':Modificacion'); 
+  $group->get('/lista[/]', \MesaAPI::class . ':Listar'); 
+  //Import/Export
+  $group->get('/export[/]', \MesaAPI::class . ':ExportarTabla');  
+  $group->post('/import[/]', \MesaAPI::class . ':ImportarTabla');  
+});
 
-//Pedido
-$app->post('/pedido/alta[/]', \PedidoAPI::class . ':Alta')
-->add(\UsuarioMW::class. ':ValidarMozo')
-->add(\UsuarioMW::class. ':ValidarToken');
-$app->delete('/pedido/baja/{id}[/]', \PedidoAPI::class . ':Baja');
-$app->post('/pedido/modificacion[/]', \PedidoAPI::class . ':Modificacion');
+//Usuarios
+$app->group('/empleados', function (RouteCollectorProxy $group) 
+{
+  //ABM
+  $group->post('/alta[/]', \UsuarioAPI::class . ':Alta');
+  $group->delete('/baja/{id}[/]', \UsuarioAPI::class . ':Baja');
+  $group->post('/modificacion[/]', \UsuarioAPI::class . ':Modificacion'); 
+  $group->get('/lista[/]', \UsuarioAPI::class . ':Listar');  
+});
 
-
-//PedidoProducto
-$app->post('/pedidoproducto/alta[/]', \PedidoProductoAPI::class . ':Alta'); 
-$app->delete('/pedidoproducto/baja/{id}[/]', \PedidoProductoAPI::class . ':Baja'); 
-$app->post('/pedidoproducto/modificacion[/]', \PedidoProductoAPI::class . ':Modificacion'); 
+//Productos
+$app->group('/productos', function (RouteCollectorProxy $group) 
+{
+  $group->post('/alta[/]', \ProductoAPI::class . ':Alta'); 
+  $group->delete('/baja/{id}[/]', \ProductoAPI::class . ':Baja');
+  $group->post('/modificacion[/]', \ProductoAPI::class . ':Modificacion');  
+  $group->get('/lista[/]', \ProductoAPI::class . ':Listar');  
+});
 
 //Reportes
-//solo socios
-$app->get('/reportes/demorapedidoscerrados[/]', \ReportesAPI::class . ':DemoraPedidosCerrados');  
-$app->get('/reportes/estadomesas[/]', \ReportesAPI::class . ':EstadoMesas');  
-$app->get('/reportes/mejorescomentarios[/]', \ReportesAPI::class . ':MejoresComentarios');  
-$app->get('/reportes/mesamasusada[/]', \ReportesAPI::class . ':MesaMasUsada');  
+$app->group('/reportes', function (RouteCollectorProxy $group) 
+{
+  $group->get('/demorapedidoscerrados[/]', \ReportesAPI::class . ':DemoraPedidosCerrados');  
+  $group->get('/estadomesas[/]', \ReportesAPI::class . ':EstadoMesas');  
+  $group->get('/mejorescomentarios[/]', \ReportesAPI::class . ':MejoresComentarios');  
+  $group->get('/mesamasusada[/]', \ReportesAPI::class . ':MesaMasUsada'); 
+})
+  ->add(\UsuarioMW::class. ':ValidarSocio')
+  ->add(\UsuarioMW::class. ':ValidarToken');
+$app->post('/reportes/demorapedidomesa[/]', \ReportesAPI::class . ':DemoraPedidoMesa'); 
 
+//Pedido
+$app->group('/pedido', function (RouteCollectorProxy $group) 
+{
+  //ABM
+  $group->post('/alta[/]', \PedidoAPI::class . ':Alta');
+  $group->delete('/baja/{id}[/]', \PedidoAPI::class . ':Baja');
+  $group->post('/modificacion[/]', \PedidoAPI::class . ':Modificacion');
+  $group->post('/subirfoto[/]', \PedidoAPI::class . ':SubirFoto');
+})
+  //->add(\UsuarioMW::class. ':ValidarMozo')
+  //->add(\UsuarioMW::class. ':ValidarToken')
+  ;
 
+//PedidoProducto
+$app->group('/pedidoproducto', function (RouteCollectorProxy $group) 
+{
+  //ABM
+  $group->post('/alta[/]', \PedidoProductoAPI::class . ':Alta'); 
+  $group->delete('/baja/{id}[/]', \PedidoProductoAPI::class . ':Baja'); 
+  $group->post('/modificacion[/]', \PedidoProductoAPI::class . ':Modificacion'); 
+})
+  ->add(\UsuarioMW::class. ':ValidarMozo')
+  ->add(\UsuarioMW::class. ':ValidarToken');
 
 $app->post('/pedido/comiendo[/]', \PedidoAPI::class . ':PasarAComiendo'); 
 $app->post('/pedido/pagando[/]', \PedidoAPI::class . ':PasarAPagando'); 
@@ -110,7 +140,10 @@ $app->post('/pedido/listo[/]', \PedidoProductoAPI::class . ':PedidoListo');
 $app->post('/encuesta/nuevaEncuesta[/]', \EncuestaAPI::class . ':Alta'); 
 
 
+
 $app->get('/pedido/lista[/]', \PedidoAPI::class . ':Listar');  
+
+//una para cada tipo
 $app->get('/pedido/listaBarra[/]', \PedidoProductoAPI::class . ':ListarPedidosBarra');  
 $app->get('/pedido/listaChoperas[/]', \PedidoProductoAPI::class . ':ListarPedidosChoperas');  
 $app->get('/pedido/listaCocina[/]', \PedidoProductoAPI::class . ':ListarPedidosCocina');  

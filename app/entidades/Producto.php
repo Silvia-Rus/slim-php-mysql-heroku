@@ -67,7 +67,7 @@ class Producto
         {
             $productoAuxNombre = AccesoDatos::retornarObjetoPorCampo($producto->nombre, 'nombre', 'producto', 'Producto');
             $retorno = 2; //es el mismo nombre
-            if($productoAuxNombre == null)
+            if($productoAuxNombre == null || $productoAuxNombre[0]->id == $producto->id)
             {
                 $producto->activo = 1;
                 Producto::modificarRegistro($producto);

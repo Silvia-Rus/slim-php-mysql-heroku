@@ -75,8 +75,8 @@ class Usuario
         if($usuarioAux != null)
         {
             $usuarioAuxDNI = AccesoDatos::retornarObjetoPorCampo($usuario->dni, 'dni', 'usuario', 'Usuario');
-            $retorno = 2; //es el mismo nombre
-            if($usuarioAuxDNI  == null)
+            $retorno = 2; //es el mismo dni
+            if($usuarioAuxDNI  == null || $usuarioAuxDNI[0]->id == $usuario->id)
             {
                 $usuario->activo = 1;
                 Usuario::modificarRegistro($usuario);
@@ -90,10 +90,9 @@ class Usuario
     {
         $retorno = null;
         $idDni = AccesoDatos::retornarObjetoActivoPorCampo($dni, 'dni', 'usuario', 'Usuario');
-        var_dump($idDni);
         if($idDni != null)
         {
-            if($clave == $idDni[0]->clave)
+            if(password_verify($clave, $idDni[0]->clave))
             {
                 $log = new Log($idDni[0]->id, 'Login');
                 Log::Alta($log);
@@ -135,10 +134,9 @@ class Usuario
             $objAccesoDatos = AccesoDatos::obtenerInstancia();
             $consulta = $objAccesoDatos->prepararConsulta("INSERT INTO usuario (dni, clave, tipo, activo, created_at, updated_at) 
                                                                          VALUES (:dni, :clave, :tipo, :activo, :created_at, :updated_at) ");
-            //$claveHash = password_hash($this->clave, PASSWORD_DEFAULT);
+            $claveHash = password_hash($this->clave, PASSWORD_DEFAULT);
             $consulta->bindValue(':dni', $this->dni, PDO::PARAM_STR);
-            //$consulta->bindValue(':clave', $claveHash);
-            $consulta->bindValue(':clave', $this->clave);
+            $consulta->bindValue(':clave', $claveHash);
             $consulta->bindValue(':tipo', $this->tipo, PDO::PARAM_STR);
             $consulta->bindValue(':activo', '1', PDO::PARAM_STR);
             $fecha = new DateTime(date("d-m-Y H:i:s"));

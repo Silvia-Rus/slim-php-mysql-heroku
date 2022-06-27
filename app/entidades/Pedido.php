@@ -117,6 +117,23 @@ class Pedido
         return $precio;
     }
 
+    public function GuardarImagen()
+    {     
+        $nombreFoto = "foto_pedido_".$this->id.".jpg";
+        $destino = ".".DIRECTORY_SEPARATOR."fotospedidos".DIRECTORY_SEPARATOR.DIRECTORY_SEPARATOR;
+
+        if(!file_exists($destino))
+        {
+            mkdir($destino, 0777, true);
+        }
+
+        $dir = $destino.$nombreFoto;
+        move_uploaded_file($this->foto, $dir);
+        $this->foto = $dir;
+        Pedido::grabarFoto($this);
+        return $dir;
+    }
+
     public function crearRegistro() 
     {
         $retorno = null;
@@ -173,6 +190,27 @@ class Pedido
             $consulta->bindValue(':fecha_fin', $pedido->fecha_fin);
             $consulta->bindValue(':precio_final', $pedido->precio_final);
             $consulta->bindValue(':activo', $pedido->activo, PDO::PARAM_STR);
+            $consulta->bindValue(':foto', $pedido->foto, PDO::PARAM_STR);
+            $fecha = new DateTime(date("d-m-Y H:i:s"));
+            $consulta->bindValue(':updated_at', date_format($fecha, 'Y-m-d H:i:s'));
+            $consulta->execute();
+        }
+        catch(Throwable $mensaje)
+        {
+            printf("Error al conectar en la base de datos: <br> $mensaje .<br>");
+        }
+    }
+
+    public static function grabarFoto($pedido)
+    {       
+        try
+        {
+            $objAccesoDato = AccesoDatos::obtenerInstancia();
+            $consulta = $objAccesoDato->prepararConsulta("UPDATE pedido
+                                                          SET foto = :foto,                                                            
+                                                              updated_at = :updated_at
+                                                          WHERE id = :id");
+            $consulta->bindValue(':id', $pedido->id, PDO::PARAM_STR);
             $consulta->bindValue(':foto', $pedido->foto, PDO::PARAM_STR);
             $fecha = new DateTime(date("d-m-Y H:i:s"));
             $consulta->bindValue(':updated_at', date_format($fecha, 'Y-m-d H:i:s'));

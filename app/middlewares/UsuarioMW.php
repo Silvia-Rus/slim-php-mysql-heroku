@@ -1,6 +1,8 @@
 <?php
 
 include_once("token/Token.php");
+include_once("db/AccesoDatos.php");
+
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Server\RequestHandlerInterface as RequestHandler;
 use Slim\Psr7\Response;
@@ -30,12 +32,13 @@ class UsuarioMW
     {
         try 
         {
+            $tipo = AccesoDatos::retornarObjetoActivoPorCampo('mozo', 'nombre', 'tipo_usuario', 'TipoUsuario');
             $header = $request->getHeaderLine('Authorization');
             if(!empty($header))
             {
                 $token = trim(explode("Bearer", $header)[1]);
                 $data = Token::verifyToken($token);
-                if($data->tipo == "4")
+                if($data->tipo == $tipo[0]->id)
                 {
                     return $handler->handle($request);
                 }
@@ -59,12 +62,13 @@ class UsuarioMW
     {
         try 
         {
+            $tipo = AccesoDatos::retornarObjetoActivoPorCampo('socio', 'nombre', 'tipo_usuario', 'TipoUsuario');
             $header = $request->getHeaderLine('Authorization');
             if(!empty($header))
             {
                 $token = trim(explode("Bearer", $header)[1]);
                 $data = Token::verifyToken($token);
-                if($data->tipo == "5")
+                if($data->tipo == $tipo[0]->id)
                 {
                     return $handler->handle($request);
                 }
