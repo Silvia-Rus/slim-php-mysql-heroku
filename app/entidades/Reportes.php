@@ -102,5 +102,17 @@ class Reportes
         
         return AccesoDatos::ObtenerConsulta($sql, null);
     }
+
+    public static function Cuenta($idPedido)
+    {
+        $sql = "SELECT pr.nombre as producto, 
+                        pp.cantidad as cantidad
+                FROM producto pr 
+                        right JOIN pedido_producto pp ON pp.id_producto = pr.id 
+                        left JOIN pedido p ON pp.id_pedido = p.id 
+                WHERE pp.estado = 2 AND pp.activo = 1 AND p.id = 13;";
+        
+        return AccesoDatos::ObtenerConsulta($sql, null);
+    }
 }
 ?>

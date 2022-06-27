@@ -160,5 +160,6 @@ $app->post('/pedido/enpreparacion[/]', \PedidoProductoAPI::class . ':PedidoEnPre
 $app->post('/pedido/listo[/]', \PedidoProductoAPI::class . ':PedidoListo'); 
 
 $app->post('/encuesta/nuevaEncuesta[/]', \EncuestaAPI::class . ':Alta'); 
+$app->post('/pdf/pdf[/]', \PedidoAPI::class . ':HacerPdf');
 
 $app->run();

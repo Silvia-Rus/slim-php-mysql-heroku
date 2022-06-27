@@ -92,11 +92,6 @@ class Encuesta
             printf("Error al conectar en la base de datos: <br> $mensaje .<br>");
         }
     }
-
 }
-
-
-
-
 
 ?>
