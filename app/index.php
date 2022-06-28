@@ -28,7 +28,9 @@ include_once './db/AccesoDatos.php';
 include_once './middlewares/UsuarioMW.php';
 
 
-$dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
+// $dotenv = Dotenv\Dotenv::createImmutable(__DIR__); este anda en local
+$dotenv = \Dotenv\Dotenv::createImmutable(__DIR__ . '/../');
+
 $dotenv->load();
 
 $app = AppFactory::create();
