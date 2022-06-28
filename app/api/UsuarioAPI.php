@@ -1,4 +1,5 @@
 <?php
+//require_once("Entidades/Usuario.php");
 include_once("Entidades/Usuario.php");
 include_once("token/Token.php");
 

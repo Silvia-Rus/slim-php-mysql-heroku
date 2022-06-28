@@ -1,5 +1,6 @@
 <?php
-include_once("Entidades/Mesa.php");
+require_once("Entidades/Mesa.php");
+//include_once("Entidades/Mesa.php");
 include_once("importexport/CSV.php");
 
 
