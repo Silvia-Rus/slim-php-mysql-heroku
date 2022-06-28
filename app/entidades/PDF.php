@@ -1,7 +1,5 @@
 <?php
 include_once("interfaces/IEntidad.php");
-
-
 include_once("fpdf/fpdf.php");
 
 class PDF

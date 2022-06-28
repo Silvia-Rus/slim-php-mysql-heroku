@@ -1,6 +1,5 @@
 <?php
 
-//require './Applications/XAMPP/xamppfiles/htdocs/slim-php-mysql-heroku/vendor/autoload.php';
 require "../vendor/autoload.php";
 use Firebase\JWT\JWT;
 

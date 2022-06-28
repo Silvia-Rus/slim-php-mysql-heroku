@@ -44,7 +44,7 @@ class Encuesta
         $consulta->bindValue(':nota_cocinero', $this->nota_cocinero, PDO::PARAM_STR);
         $consulta->bindValue(':texto', $this->texto, PDO::PARAM_STR);
         $consulta->bindValue(':activo', '1', PDO::PARAM_STR);
-        $fecha = new DateTime(date("d-m-Y"));
+        $fecha = new DateTime(date("d-m-Y H:i:s"));
         $consulta->bindValue(':created_at', date_format($fecha, 'Y-m-d H:i:s'));
         $consulta->bindValue(':updated_at', date_format($fecha, 'Y-m-d H:i:s'));
         $consulta->execute();
@@ -84,7 +84,7 @@ class Encuesta
             $consulta->bindValue(':texto', $item->texto, PDO::PARAM_STR);
             $consulta->bindValue(':activo', $item->texto, PDO::PARAM_STR);
             $fecha = new DateTime(date("d-m-Y H:i:s"));
-            $consulta->bindValue(':updated_at', date_format($item, 'Y-m-d H:i:s'));
+            $consulta->bindValue(':updated_at', date_format($fecha, 'Y-m-d H:i:s'));
             $consulta->execute();
         }
         catch(Throwable $mensaje)

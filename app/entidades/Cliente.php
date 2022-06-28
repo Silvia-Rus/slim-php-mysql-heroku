@@ -6,6 +6,8 @@ class Cliente
 {
     public $id;
     public $nombre;
+
+    
     public $activo;
     public $created_at;
     public $updated_at;

@@ -163,7 +163,7 @@ class AccesoDatos
                 FROM pedido_producto pp 
                     LEFT JOIN producto pr ON pp.id_producto = pr.id
                     LEFT JOIN sector s ON pr.id_sector = s.id
-                WHERE s.id = $sector and pp.estado < 3
+                WHERE s.id = $sector and pp.estado < 2
                 ORDER BY pp.id_pedido, pp.created_at;";
          
         return AccesoDatos::ObtenerConsulta($sql);

@@ -105,7 +105,7 @@ class Pedido implements IEntidad
                     LEFT JOIN pedido p ON m.id = p.id_mesa
                     LEFT JOIN pedido_producto pp ON p.id = pp.id_pedido
                     LEFT JOIN producto pr ON pr.id = pp.id_producto
-                WHERE p.id_mesa = $mesa AND p.estado = 3 AND pp.estado = 2;";       
+                WHERE p.id_mesa = $mesa AND p.estado = 2 AND pp.estado = 2;";       
         $lista = AccesoDatos::ObtenerConsulta($sql);
 
         foreach($lista as $item)

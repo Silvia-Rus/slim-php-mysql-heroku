@@ -16,6 +16,8 @@ class EncuestaAPI
             $encuesta->nota_cocinero = $params["nota_cocinero"];
             $encuesta->texto = $params["texto"];
             $respuesta = Encuesta::Alta($encuesta);
+            //var_dump($respuesta);
+
             if($respuesta == 0)
             {
                 $respuesta = 'Problema grabando la encuesta.';
